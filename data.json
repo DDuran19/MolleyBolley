@@ -1,0 +1,18 @@
+{
+    "employees": {
+        "Henry": "Free",
+        "David": "Free",
+        "Sarah": "Free",
+        "Michael": "Free"
+    },
+    "services": [
+        "Manicure",
+        "Pedicure",
+        "Haircut"
+    ],
+    "accounts": {
+        "admin": "password",
+        " ": " "
+    },
+    "customers_served": {}
+}
