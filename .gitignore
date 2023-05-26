@@ -1,2 +1,7 @@
 \__pycache__
 \test.py
+\build
+\dist
+\installerscript.iss
+MolleyBolley.exe
+\molleybolley.spec
