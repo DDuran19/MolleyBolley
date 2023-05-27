@@ -116,21 +116,42 @@ class Update_services:
 class Data_analysis:
     def __init__(self):
         self.database_path = DATABASE_PATH
+
     def get_total_services_per_day(self, date):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
             select_query = '''SELECT employee_name, SUM(manicure), SUM(pedicure), SUM(threading), 
-                              SUM(haircut), SUM(hairtreatment), SUM(other)
-                              FROM daily_services
-                              WHERE date = ?
-                              GROUP BY employee_name'''
+                            SUM(haircut), SUM(hairtreatment), SUM(other)
+                            FROM daily_services
+                            WHERE date = ?
+                            GROUP BY employee_name'''
             try:
                 cursor.execute(select_query, (date,))
                 rows = cursor.fetchall()
-                return rows
+                employees = {}
+                for row in rows:
+                    employee_name = row[0]
+                    manicure = row[1]
+                    pedicure = row[2]
+                    threading = row[3]
+                    haircut = row[4]
+                    hairtreatment = row[5]
+                    other = row[6]
+                    employees[employee_name] = {
+                        "Manicure": manicure,
+                        "Pedicure": pedicure,
+                        "Threading": threading,
+                        "Haircut": haircut,
+                        "Hairtreatment": hairtreatment,
+                        "Other": other
+                    }
+                
+                df = pd.DataFrame.from_dict(employees, orient='index')              
+                
+                return df
             except Exception as e:
                 print(e)
-                return []
+                return {}
 
     def get_total_services_per_week(self, start_date):
         with sqlite3.connect(self.database_path) as db:
@@ -149,28 +170,39 @@ class Data_analysis:
                 print(e)
                 return []
              
-    def get_running_total_per_day(self, date):
+    def get_running_total_per_day(self, date=datetime.today().date()):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
-            select_query = '''SELECT employee_name, SUM(manicure), SUM(pedicure), SUM(threading), 
+            select_query = '''SELECT SUM(manicure), SUM(pedicure), SUM(threading), 
                               SUM(haircut), SUM(hairtreatment), SUM(other)
                               FROM daily_services
-                              WHERE date = ?
-                              GROUP BY employee_name
-                              ORDER BY employee_name'''
+                              WHERE date = ?'''
             try:
                 cursor.execute(select_query, (date,))
                 rows = cursor.fetchall()
-                running_totals = []
-                previous_totals = [0] * 6  # Initialize previous totals to zeros for each service
+                running_service_total = {}
                 for row in rows:
-                    current_totals = [row[i + 1] + previous_totals[i] for i in range(6)]  # Calculate running totals
-                    running_totals.append((row[0], tuple(current_totals)))  # Append employee and running totals
-                    previous_totals = current_totals
-                return running_totals
+                    manicure = row[0]
+                    pedicure = row[1]
+                    threading = row[2]
+                    haircut = row[3]
+                    hairtreatment = row[4]
+                    other = row[5]
+                    running_service_total[date] = {
+                        "Manicure": manicure,
+                        "Pedicure": pedicure,
+                        "Threading": threading,
+                        "Haircut": haircut,
+                        "Hairtreatment": hairtreatment,
+                        "Other": other
+                    }
+                
+                df = pd.DataFrame.from_dict(running_service_total, orient='index')              
+                
+                return df
             except Exception as e:
                 print(e)
-                return []
+                return {}
 
 class ExportData:
     def __init__(self):
@@ -283,8 +315,8 @@ class Employees:
                 return []
 
 if __name__ == "__main__":
-    p = 'password'
-    a = Login_query()
+    # p = 'password'
+    # a = Login_query()
     # b= a.login('admin',p)
     # print(b)
 
@@ -309,6 +341,10 @@ if __name__ == "__main__":
     # print(h)
     # i = a.change_password('megauser',"Password")
     # print(a.login('megauser',"Password"))
-    j = a.add_user("Denver","Denver")
-    k=a.login('Denver','Denver')
-    print(k)
+    # j = a.add_user("Denver","Denver")
+    # k=a.login('Denver','Denver')
+    # print(k)
+    l = Data_analysis()
+    m = l.get_total_services_per_day(datetime.today().date())
+    print(m)
+    print(datetime.today().date())

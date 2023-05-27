@@ -1,23 +1,36 @@
 import json
 import tkinter as tk
+import matplotlib.pyplot as plt
+import pandas as pd
 
 from queries import Data_analysis,Login_query,Update_services, Employees
 
+from datetime import datetime
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import font
 from PIL import Image, ImageTk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 FREE = "Free"
 END = "end"
 EMPTY = ""
 NORTHEASTWEST = "new"
+ENTER_KEY="<Return>"
+LEFT_CLICK = "<Button-1>"
+DOUBLE_LEFT_CLICK = "<Double-1>"
+TODAY = datetime.today().date()
+
 class LoginWindow(tk.Tk):
     royal_blue = "#08147d"
     white = "#ffffff"
     #frozen_white = "#e6f1ff"
     frozen_white = "#ffffff"
     app_title="MOLEYBOLEY"
+    image_header = Image.open("images/business_logo.jpg")
+    business_logo = None
+    app_label = None
+
     def __init__(self):
         super().__init__()
         self.title(self.app_title)
@@ -80,9 +93,10 @@ class LoginWindow(tk.Tk):
             data = json.load(file)
             self.services:list = data["services"] 
             self.accounts:dict = data["accounts"]
-            self.customers_served:dict = data["customers_served"]
         query = Employees()
         self.employees = query.get_employees()
+        query = Data_analysis()
+        self.customers_served = query.get_running_total_per_day(TODAY) 
     
     def create_login_frame(self):
         self.frame = tk.Frame(self, bg=self.royal_blue,padx=50,pady=15, highlightthickness=4, highlightbackground="silver",relief='ridge')
@@ -93,13 +107,13 @@ class LoginWindow(tk.Tk):
         self.username_label.grid(row=0, column=0, sticky="e")
         self.username_entry = tk.Entry(self.frame)
         self.username_entry.grid(row=0, column=1)
-        self.username_entry.bind("<Return>",self.login)
+        self.username_entry.bind(ENTER_KEY,self.login)
 
         self.password_label = tk.Label(self.frame, text="Password:", bg=self.royal_blue, fg=self.white)
         self.password_label.grid(row=1, column=0, sticky="e")
         self.password_entry = tk.Entry(self.frame, show="*")
         self.password_entry.grid(row=1, column=1)
-        self.password_entry.bind("<Return>",self.login)
+        self.password_entry.bind(ENTER_KEY,self.login)
 
         self.show_password_var = tk.BooleanVar()
         self.show_password_check = tk.Checkbutton(self.frame, variable=self.show_password_var, 
@@ -112,7 +126,7 @@ class LoginWindow(tk.Tk):
 
         self.forgot_password_label = tk.Label(self.frame, text="Forgot Password", fg=self.white, bg=self.royal_blue, cursor="hand2")
         self.forgot_password_label.grid(row=3, columnspan=2, pady=10)
-        self.forgot_password_label.bind("<Button-1>", self.forgot_password)
+        self.forgot_password_label.bind(LEFT_CLICK, self.forgot_password)
 
         login_button = tk.Button(self.frame, text="Login", command=lambda: self.login(None), bg=self.royal_blue, fg=self.white)
         login_button.grid(row=4, columnspan=2)
@@ -157,7 +171,7 @@ class LoginWindow(tk.Tk):
         self.wait_list.heading("Service", text="Service")
         self.wait_list.column("#0", width=int(self.screen_width*.75/2))
         self.wait_list.column("Service", width=int(self.screen_width*.75/2))
-        self.wait_list.bind("<Delete>", lambda event: self.delete_item(event=event,isWaitList=True,manual_delete=True))
+        self.wait_list.bind("<Delete>", lambda event: self.delete_customer)
 
 
         self.wait_list_frame = tk.Frame(self.trees, borderwidth=1, relief="solid", bg=self.royal_blue)
@@ -174,9 +188,8 @@ class LoginWindow(tk.Tk):
         self.employee_list.column("#0", width=int(self.screen_width*.75/3))
         self.employee_list.column("Service", width=int(self.screen_width*.75/3))
         self.employee_list.column("Status", width=int(self.screen_width*.75/3))
-        self.employee_list.bind("<Delete>", lambda event: self.delete_item(event=event,isWaitList=False,manual_delete=True))
-        self.employee_list.bind("<Button-1>",self.on_employee_left_click)
-        self.employee_list.bind("<Double-1>",self.on_employee_double_click)
+        self.employee_list.bind(LEFT_CLICK,self.on_employee_left_click)
+        self.employee_list.bind(DOUBLE_LEFT_CLICK,self.on_employee_double_click)
         self.add_initial_items_on_employee_list()
 
         self.trees.columnconfigure(0, weight=1)
@@ -191,12 +204,11 @@ class LoginWindow(tk.Tk):
         self.employee_entry.insert(0, employee_name["text"])
     
     def on_employee_double_click(self,event):
-        message = f'The following data only includes those who are added during this session.\n\n'
-
-        for key,value in self.customers_served.items():
-            message+=f'{key} = {value} customers\n'
-        
-        messagebox.showinfo("Employees Served Today",message=message)
+        self.load_existing_data()
+        message = self.customers_served
+        query = Data_analysis()
+        actuals = query.get_total_services_per_day(TODAY)
+        GraphResults(self,message,actuals)
 
     def add_initial_items_on_employee_list(self):
         for employee, values in self.employees.items():
@@ -225,8 +237,6 @@ class LoginWindow(tk.Tk):
         self.employee_entry.insert(0, "Add employee name here")
         self.employee_entry.bind("<FocusIn>", lambda event :self.clear_placeholder(event = event,isCustomer=False))
         self.employee_entry.bind("<FocusOut>", lambda event: self.restore_placeholder(event=event,isCustomer=False))
-        self.employee_entry.bind("<Return>", self.add_employee)
-        
           
         self.employees_dropdown = ttk.Combobox(self.buttons_frame, values=self.free_employees, state="readonly",foreground=self.white, background=self.royal_blue)
         self.assign_to_button = tk.Button(self.buttons_frame, text="Assign-to",fg=self.white, bg=self.royal_blue,command=self.assign_customer_to_employee)
@@ -241,46 +251,21 @@ class LoginWindow(tk.Tk):
         except IndexError:
             self.next_in_line.configure(text=EMPTY)
 
-    def delete_item(self,event,isWaitList:bool,employee_name=None,manual_delete=False):
-        if manual_delete:
-            result = messagebox.askyesno("Confirmation", "Are you sure you want to delete this?\n This is IRREVERSIBLE")
-            if not result:
-                return
+    def delete_customer(self,event):
+        selected_customer = self.wait_list.focus()
+        if not selected_customer:
+            name=self.next_in_line.cget("text")
+            for item in self.wait_list.get_children():
+                if self.wait_list.item(item,"text")==name:
+                    selected_customer=item
+        if not selected_customer:
+            return None
+        service, =self.wait_list.item(selected_customer)['values']
+        values = f"{service}: {self.wait_list.item(selected_customer)['text']}"
+        self.wait_list.delete(selected_customer)
+        self.update_next_in_line()
+        return values
 
-        if isWaitList:
-            selected_item = self.wait_list.focus()
-            if not selected_item:
-                name=self.next_in_line.cget("text")
-                for item in self.wait_list.get_children():
-                    if self.wait_list.item(item,"text")==name:
-                        selected_item=item
-            if not selected_item:
-                return None
-            service, =self.wait_list.item(selected_item)['values']
-            values = f"{service}: {self.wait_list.item(selected_item)['text']}"
-            self.wait_list.delete(selected_item)
-            self.update_next_in_line()
-            return values
-        
-        if employee_name is None:
-            selected_item = self.employee_list.focus()
-            employee_name:str = self.employee_list.item(selected_item)['text']
-            self.employee_list.delete(selected_item)
-            self.update_next_in_line()            
-        deleted_employee=employee_name
-        with open("data.json", "r+") as file:
-            data = json.load(file)
-            data["employees"].pop(employee_name)
-            file.seek(0)
-            json.dump(data, file, indent=4)
-            file.truncate()
-        if employee_name is not None:
-            for item in self.employee_list.get_children():
-                if self.employee_list.item(item, "text") == deleted_employee:
-                    self.employee_list.delete(item)
-                    self.update_next_in_line()
-                    break
-            return deleted_employee
 
     def add_employee(self,event,status: str = FREE,employee_name = None,mark_as_free_name = None):
 
@@ -319,7 +304,7 @@ class LoginWindow(tk.Tk):
         assigned_employee = self.employees_dropdown.get()
         if assigned_employee == EMPTY:
             return
-        values = self.delete_item(None, True)
+        values = self.delete_customer(None)
         if values is None:
             return  
         query = Employees()
@@ -381,6 +366,71 @@ class LoginWindow(tk.Tk):
         else:
             messagebox.showerror("Login", "Invalid username or password!")
 
+class GraphResults(tk.Toplevel):
+    ROYAL_BLUE ="#08147d"
+    def __init__(self, parent: tk.Tk, data: pd.DataFrame,actuals:pd.DataFrame):
+        super().__init__(parent)
+        self.title("Running Services for today")
+        transposed_data = data.transpose()
+
+        self.figure: plt.Figure = plt.Figure(figsize=(6, 4))
+        self.axes: plt.Axes = self.figure.add_subplot(111)
+
+        transposed_data.plot.bar(ax=self.axes,edgecolor='black', color=self.ROYAL_BLUE)
+        self.axes.set_xticklabels(self.axes.get_xticklabels(), rotation=10)
+
+        for rectangle in self.axes.patches:
+            x = rectangle.get_x() + rectangle.get_width() / 2
+            y = rectangle.get_height() / 2  
+            count_value = int(rectangle.get_height())  
+            self.axes.text(x, y, count_value, ha='center', va='center',color="white")
+
+        # Create a canvas to display the graph
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=False)
+
+        self.create_table(actuals)
+
+
+        label = tk.Label(self, text="Click the Extract button to extract the data.")
+        label.pack(pady=10)
+
+        extract_button = ttk.Button(self, text="Extract")
+        extract_button.pack()
+    def create_table(self,df:pd.DataFrame):
+        self.screen_width = self.winfo_screenwidth()
+        self.screen_height = self.winfo_screenheight()
+        if self.screen_height > 900:
+            my_font = font.Font(size=10)
+
+        else:
+            my_font = font.Font(size=8)
+
+        style = ttk.Style()
+        style.configure("myCustom.Treeview",foreground="black",font=my_font)
+        style.configure("myCustom.Treeview.Heading", background=self.ROYAL_BLUE, foreground="white",font=my_font)
+        
+        self.actual_table = ttk.Treeview(self,style="myCustom.Treeview")
+        self.actual_table["columns"] = df.columns.tolist()
+        self.actual_table.configure(height=5)
+        for column in df.columns:
+            column_name = column
+            column_width = 100
+            self.actual_table.heading(column, text=column_name, anchor=tk.W)
+            self.actual_table.column(column, width=column_width, anchor=tk.W)
+
+        for index, row in df.iterrows():
+            self.actual_table.insert("", "end", text=index, values=row.tolist())
+
+        self.actual_table.pack(pady=10)
+
 if __name__ == "__main__":
     login_window = LoginWindow()
     login_window.mainloop()
+    # data = pd.DataFrame({'Category': ['A', 'B', 'C', 'D'],
+    #                  'Value': [10, 20, 15, 25]})
+
+    # root = tk.Tk()
+    # graph_results = GraphResults(root, data)
+    # root.mainloop()
