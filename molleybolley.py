@@ -11,6 +11,7 @@ from PIL import Image, ImageTk
 FREE = "Free"
 END = "end"
 EMPTY = ""
+NORTHEASTWEST = "new"
 class LoginWindow(tk.Tk):
     royal_blue = "#08147d"
     white = "#ffffff"
@@ -57,22 +58,22 @@ class LoginWindow(tk.Tk):
                                          width=self.buttons_width,height=3)
             self.next_info.configure(font=self.large_font,bg=self.frozen_white, width=self.buttons_width)
 
-            row_height = self.large_font.metrics("linespace") + 5 
+            row_height = self.large_font.metrics("linespace") + 4 
             self.style.configure("Custom.Treeview", rowheight=row_height, font=self.large_font)
             self.employee_list.configure(height=5)
             self.style.configure("Custom.Treeview.Heading", font=self.large_font,background=self.royal_blue,foreground=self.white)
         except AttributeError:
             pass
     def grid_all_buttons(self):
-        self.customer_entry.grid(row=0, column=0, padx=0, pady=(0, 0), sticky="new")
-        self.services_dropdown.grid(row=1, column=0, padx=0, pady=(0, 0), sticky="new")
-        self.submit_button.grid(row=2, column=0, padx=0, pady=(0, 7),sticky="new")
-        self.next_info.grid(row=3, column=0, padx=0, pady=(0, 0),sticky="new")
-        self.next_in_line.grid(row=4, column=0, padx=0, pady=(10, 10),sticky="new")
-        self.employees_dropdown.grid(row=5, column=0, padx=0, pady=(10, 0),sticky="new")
-        self.assign_to_button.grid(row=6, column=0, padx=0, pady=(0, 23),sticky="new") 
-        self.employee_entry.grid(row=7, column=0, padx=0, pady=(0, 0),sticky="new") 
-        self.mark_as_free_button.grid(row=8, column=0, padx=0, pady=(0,0),sticky="new")
+        self.customer_entry.grid(row=0, column=0, padx=0, pady=(0, 0), sticky=NORTHEASTWEST)
+        self.services_dropdown.grid(row=1, column=0, padx=0, pady=(0, 0), sticky=NORTHEASTWEST)
+        self.submit_button.grid(row=2, column=0, padx=0, pady=(0, 7),sticky=NORTHEASTWEST)
+        self.next_info.grid(row=3, column=0, padx=0, pady=(0, 0),sticky=NORTHEASTWEST)
+        self.next_in_line.grid(row=4, column=0, padx=0, pady=(10, 10),sticky=NORTHEASTWEST)
+        self.employees_dropdown.grid(row=5, column=0, padx=0, pady=(10, 0),sticky=NORTHEASTWEST)
+        self.assign_to_button.grid(row=6, column=0, padx=0, pady=(0, 23),sticky=NORTHEASTWEST) 
+        self.employee_entry.grid(row=7, column=0, padx=0, pady=(0, 0),sticky=NORTHEASTWEST) 
+        self.mark_as_free_button.grid(row=8, column=0, padx=0, pady=(0,0),sticky=NORTHEASTWEST)
 
     def load_existing_data(self):
         with open("data.json", "r") as file:
@@ -147,10 +148,10 @@ class LoginWindow(tk.Tk):
         self.trees.grid(row=0, column=0, sticky="w")
 
         self.wait_list_frame = tk.Frame(self.trees, borderwidth=1, relief="solid", bg=self.royal_blue)
-        self.wait_list_frame.grid(row=0, column=0, sticky="new", pady=(0, 25))
+        self.wait_list_frame.grid(row=0, column=0, sticky=NORTHEASTWEST, pady=(0, 25))
 
         self.wait_list = ttk.Treeview(self.wait_list_frame, height=int(self.screen_height*0.0095), style="Custom.Treeview")
-        self.wait_list.grid(row=0, column=0, pady=0,sticky="new")
+        self.wait_list.grid(row=0, column=0, pady=0,sticky=NORTHEASTWEST)
         self.wait_list['columns'] = ("Service",)
         self.wait_list.heading("#0", text="Customer Name")
         self.wait_list.heading("Service", text="Service")
