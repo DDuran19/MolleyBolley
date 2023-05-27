@@ -2,10 +2,11 @@ import json
 import tkinter as tk
 import matplotlib.pyplot as plt
 import pandas as pd
+import datetime
 
-from queries import Data_analysis,Login_query,Update_services, Employees
+from queries import Data_analysis,Login_query,Update_services, Employees, ExportData
 
-from datetime import datetime
+from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import font
@@ -19,7 +20,7 @@ NORTHEASTWEST = "new"
 ENTER_KEY="<Return>"
 LEFT_CLICK = "<Button-1>"
 DOUBLE_LEFT_CLICK = "<Double-1>"
-TODAY = datetime.today().date()
+TODAY = datetime.datetime.today().date()
 WHITE = "#ffffff"
 ROYAL_BLUE ="#08147d"
 
@@ -371,7 +372,7 @@ class GraphResults(tk.Toplevel):
     
     _instance = None
     def __new__(cls,*args,**kwargs):
-        if cls._instance is None:
+        if not cls._instance:
             cls._instance = cls
             return super().__new__(cls)
         else:
@@ -384,6 +385,11 @@ class GraphResults(tk.Toplevel):
         self.create_bar_graph(data)
         self.create_table(actuals)
         self.create_extract_buttons()
+
+    def destroy(self):
+        type(self)._instance = None
+        super().destroy()
+        
 
     def create_bar_graph(self,data: pd.DataFrame):
         transposed_data = data.transpose()
@@ -402,7 +408,6 @@ class GraphResults(tk.Toplevel):
         self.canvas = FigureCanvasTkAgg(self.figure, master=self)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=False)    
-
 
     def create_table(self,df:pd.DataFrame):
         self.screen_width = self.winfo_screenwidth()
@@ -454,13 +459,74 @@ class GraphResults(tk.Toplevel):
                              ("hover", ROYAL_BLUE)])
 
         extract_running = ttk.Button(extract_frame, text="Extract Running Today",style="Extract.TButton")
-        extract_7days = ttk.Button(extract_frame, text="Extract Last 7 Days",style="Extract.TButton")
-        extract_30days = ttk.Button(extract_frame, text="Extract Last 30 Days",style="Extract.TButton")
-        extract_all = ttk.Button(extract_frame, text="Extract all",style="Extract.TButton")
+        extract_7days = ttk.Button(extract_frame, text="Extract Last 7 Days",style="Extract.TButton",
+                                   command=self.extract_last_seven_days)
+        extract_30days = ttk.Button(extract_frame, text="Extract Last 30 Days",style="Extract.TButton",
+                                    command=self.extract_last_thirty_days)
+        extract_all = ttk.Button(extract_frame, text="Extract all",style="Extract.TButton",
+                                 command=self.extract_all)
         extract_running.grid(row=0, column=0, padx = 5,sticky=NORTHEASTWEST)
         extract_7days.grid(row=0, column=1, padx = 5,sticky=NORTHEASTWEST)
         extract_30days.grid(row=0, column=2, padx = 5,sticky=NORTHEASTWEST)
         extract_all.grid(row=0,column=3, padx = 5,sticky=NORTHEASTWEST)
+
+    def extract_running(self):
+        self.toggle_topmost()
+        query = ExportData()
+        default_file_name = f'Running_data_for_{TODAY}.xlsx'
+        filepath = self.ask_where_to_save(default_file_name)
+        result = query.export_to_excel(filepath,start_date=TODAY)
+        self.info_on_result(result)
+        self.toggle_topmost()
+
+
+    def extract_last_seven_days(self):
+        self.toggle_topmost()
+        query = ExportData()
+        seven_days_ago = TODAY - datetime.timedelta(days=7)
+        default_file_name = f'Data_from_{seven_days_ago}_until_{TODAY}.xlsx'
+        filepath = self.ask_where_to_save(default_file_name)
+        result = query.export_to_excel(filepath,seven_days_ago,TODAY)
+        self.info_on_result(result)
+        self.toggle_topmost()
+
+    def extract_last_thirty_days(self):
+        self.toggle_topmost()
+        query = ExportData()
+        thirty_days_ago = TODAY - datetime.timedelta(days=30)
+        default_file_name = f'Data_from_{thirty_days_ago}_until_{TODAY}.xlsx'
+        filepath = self.ask_where_to_save(default_file_name)
+        result = query.export_to_excel(filepath,thirty_days_ago,TODAY)
+        self.info_on_result(result)
+        self.toggle_topmost()
+
+    def extract_all(self):
+        self.toggle_topmost()
+        query = ExportData()
+        default_file_name = f'All_data_Extracted_{TODAY}.xlsx'
+        filepath = self.ask_where_to_save(default_file_name)
+        result = query.export_to_excel(filepath)
+        self.info_on_result(result)
+        self.toggle_topmost()
+
+    
+    def ask_where_to_save(self,default_file_name):
+        
+        file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", initialfile=default_file_name)
+        return file_path
+
+    def info_on_result(self, result):
+        if result[0]:
+            messagebox.showinfo("Successful!","Data exported successfully!")
+        else:
+            messagebox.showinfo("Failed",f"Something went wrong: {result[1]}")
+        
+    def toggle_topmost(self):
+        if self.attributes("-topmost"):
+            self.attributes("-topmost", False)
+        else:
+            self.attributes("-topmost", True)
+
 
 
 if __name__ == "__main__":

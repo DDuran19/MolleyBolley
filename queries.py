@@ -226,9 +226,10 @@ class ExportData:
             try:
                 df = pd.read_sql_query(select_query, db, params=query_params)
                 df.to_excel(output_file, index=False)
-                print(f"Data exported to '{output_file}' successfully.")
+                return (True,)
             except Exception as e:
                 print("Error exporting data to Excel:", e)
+                return (False,str(e))
 
 class Employees:
     def __init__(self):
