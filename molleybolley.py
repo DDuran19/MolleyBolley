@@ -20,12 +20,10 @@ ENTER_KEY="<Return>"
 LEFT_CLICK = "<Button-1>"
 DOUBLE_LEFT_CLICK = "<Double-1>"
 TODAY = datetime.today().date()
+WHITE = "#ffffff"
+ROYAL_BLUE ="#08147d"
 
 class LoginWindow(tk.Tk):
-    royal_blue = "#08147d"
-    white = "#ffffff"
-    #frozen_white = "#e6f1ff"
-    frozen_white = "#ffffff"
     app_title="MOLEYBOLEY"
     image_header = Image.open("images/business_logo.jpg")
     business_logo = None
@@ -34,7 +32,7 @@ class LoginWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title(self.app_title)
-        self.configure(bg=self.frozen_white)
+        self.configure(bg=WHITE)
         self.style = ttk.Style()
         self.style.theme_use('default')
         self.load_existing_data()
@@ -67,14 +65,14 @@ class LoginWindow(tk.Tk):
             self.assign_to_button.configure(font=self.large_font, width=self.buttons_width)
             self.employee_entry.configure(font=self.large_font, width=self.buttons_width)
             self.mark_as_free_button.configure(font=self.large_font, width=self.buttons_width)
-            self.next_in_line.configure(font=self.large_font,bg=self.white,highlightcolor=self.royal_blue,highlightthickness=2,
+            self.next_in_line.configure(font=self.large_font,bg=WHITE,highlightcolor=ROYAL_BLUE,highlightthickness=2,
                                          width=self.buttons_width,height=3)
-            self.next_info.configure(font=self.large_font,bg=self.frozen_white, width=self.buttons_width)
+            self.next_info.configure(font=self.large_font,bg=WHITE, width=self.buttons_width)
 
             row_height = self.large_font.metrics("linespace") + 4 
             self.style.configure("Custom.Treeview", rowheight=row_height, font=self.large_font)
             self.employee_list.configure(height=5)
-            self.style.configure("Custom.Treeview.Heading", font=self.large_font,background=self.royal_blue,foreground=self.white)
+            self.style.configure("Custom.Treeview.Heading", font=self.large_font,background=ROYAL_BLUE,foreground=WHITE)
         except AttributeError:
             pass
     def grid_all_buttons(self):
@@ -99,17 +97,17 @@ class LoginWindow(tk.Tk):
         self.customers_served = query.get_running_total_per_day(TODAY) 
     
     def create_login_frame(self):
-        self.frame = tk.Frame(self, bg=self.royal_blue,padx=50,pady=15, highlightthickness=4, highlightbackground="silver",relief='ridge')
+        self.frame = tk.Frame(self, bg=ROYAL_BLUE,padx=50,pady=15, highlightthickness=4, highlightbackground="silver",relief='ridge')
         self.frame.place(relx=0.5, rely=0.5, anchor="center")
 
 
-        self.username_label = tk.Label(self.frame, text="Username:", bg=self.royal_blue, fg=self.white)
+        self.username_label = tk.Label(self.frame, text="Username:", bg=ROYAL_BLUE, fg=WHITE)
         self.username_label.grid(row=0, column=0, sticky="e")
         self.username_entry = tk.Entry(self.frame)
         self.username_entry.grid(row=0, column=1)
         self.username_entry.bind(ENTER_KEY,self.login)
 
-        self.password_label = tk.Label(self.frame, text="Password:", bg=self.royal_blue, fg=self.white)
+        self.password_label = tk.Label(self.frame, text="Password:", bg=ROYAL_BLUE, fg=WHITE)
         self.password_label.grid(row=1, column=0, sticky="e")
         self.password_entry = tk.Entry(self.frame, show="*")
         self.password_entry.grid(row=1, column=1)
@@ -117,18 +115,18 @@ class LoginWindow(tk.Tk):
 
         self.show_password_var = tk.BooleanVar()
         self.show_password_check = tk.Checkbutton(self.frame, variable=self.show_password_var, 
-                                                  command=self.show_password,bg=self.royal_blue,activebackground=self.royal_blue)
+                                                  command=self.show_password,bg=ROYAL_BLUE,activebackground=ROYAL_BLUE)
         self.show_password_check.grid(row=2, column=1,padx=0,sticky="w")
         self.show_password_var.set(False)
 
-        show_password_label = tk.Label(self.frame, text="Show Password", bg=self.royal_blue, fg=self.white)
+        show_password_label = tk.Label(self.frame, text="Show Password", bg=ROYAL_BLUE, fg=WHITE)
         show_password_label.grid(row=2, column=1, sticky="w", padx=(20, 0))
 
-        self.forgot_password_label = tk.Label(self.frame, text="Forgot Password", fg=self.white, bg=self.royal_blue, cursor="hand2")
+        self.forgot_password_label = tk.Label(self.frame, text="Forgot Password", fg=WHITE, bg=ROYAL_BLUE, cursor="hand2")
         self.forgot_password_label.grid(row=3, columnspan=2, pady=10)
         self.forgot_password_label.bind(LEFT_CLICK, self.forgot_password)
 
-        login_button = tk.Button(self.frame, text="Login", command=lambda: self.login(None), bg=self.royal_blue, fg=self.white)
+        login_button = tk.Button(self.frame, text="Login", command=lambda: self.login(None), bg=ROYAL_BLUE, fg=WHITE)
         login_button.grid(row=4, columnspan=2)
 
     def create_main_frame(self):
@@ -137,11 +135,11 @@ class LoginWindow(tk.Tk):
         self.create_ttk_trees()
         self.create_buttons_frame()
     def create_header_on_main_frame(self):
-        self.main_frame = tk.Frame(self, bg=self.frozen_white)
+        self.main_frame = tk.Frame(self, bg=WHITE)
         self.main_frame.pack(fill="both", expand=True, padx=10, pady=10)
          
 
-        header = tk.Frame(self.main_frame,bg=self.frozen_white)
+        header = tk.Frame(self.main_frame,bg=WHITE)
         header.grid(row=0, column=0, sticky="n")
         self.main_frame.grid_columnconfigure(0, weight=1)
 
@@ -153,15 +151,15 @@ class LoginWindow(tk.Tk):
         header.grid_rowconfigure(0, weight=1)
     
     def create_two_sub_frames(self):
-        self.workarea = tk.Frame(self.main_frame, bg=self.frozen_white)
+        self.workarea = tk.Frame(self.main_frame, bg=WHITE)
         self.workarea.grid(row=1, column=0, sticky="nsew")
 
         self.main_frame.grid_rowconfigure(1, weight=1)
     def create_ttk_trees(self):
-        self.trees = tk.Frame(self.workarea, bg=self.frozen_white)
+        self.trees = tk.Frame(self.workarea, bg=WHITE)
         self.trees.grid(row=0, column=0, sticky="w")
 
-        self.wait_list_frame = tk.Frame(self.trees, borderwidth=1, relief="solid", bg=self.royal_blue)
+        self.wait_list_frame = tk.Frame(self.trees, borderwidth=1, relief="solid", bg=ROYAL_BLUE)
         self.wait_list_frame.grid(row=0, column=0, sticky=NORTHEASTWEST, pady=(0, 25))
 
         self.wait_list = ttk.Treeview(self.wait_list_frame, height=int(self.screen_height*0.0095), style="Custom.Treeview")
@@ -174,7 +172,7 @@ class LoginWindow(tk.Tk):
         self.wait_list.bind("<Delete>", lambda event: self.delete_customer)
 
 
-        self.wait_list_frame = tk.Frame(self.trees, borderwidth=1, relief="solid", bg=self.royal_blue)
+        self.wait_list_frame = tk.Frame(self.trees, borderwidth=1, relief="solid", bg=ROYAL_BLUE)
         self.wait_list_frame.grid(row=1, column=0, sticky="sew")
 
         self.employee_list = ttk.Treeview(self.wait_list_frame, height=int(self.screen_height*0.005), style="Custom.Treeview")
@@ -216,7 +214,7 @@ class LoginWindow(tk.Tk):
 
 
     def create_buttons_frame(self):
-        self.buttons_frame = tk.Frame(self.workarea, bg=self.frozen_white)
+        self.buttons_frame = tk.Frame(self.workarea, bg=WHITE)
         self.buttons_frame.grid(row=0, column=1, padx=5,sticky="n")
         
         self.customer_entry = ttk.Entry(self.buttons_frame)
@@ -224,8 +222,8 @@ class LoginWindow(tk.Tk):
         self.customer_entry.bind("<FocusIn>", lambda event :self.clear_placeholder(event = event,isCustomer=True))
         self.customer_entry.bind("<FocusOut>", lambda event: self.restore_placeholder(event=event,isCustomer=True))
 
-        self.services_dropdown = ttk.Combobox(self.buttons_frame, values=self.services, state="readonly",foreground=self.white, background=self.royal_blue)
-        self.submit_button = tk.Button(self.buttons_frame, text="Submit",fg=self.white, bg=self.royal_blue,
+        self.services_dropdown = ttk.Combobox(self.buttons_frame, values=self.services, state="readonly",foreground=WHITE, background=ROYAL_BLUE)
+        self.submit_button = tk.Button(self.buttons_frame, text="Submit",fg=WHITE, bg=ROYAL_BLUE,
                                        command=lambda: self.submit_button_clicked(None))
         self.services_dropdown.bind('<Return>',self.submit_button_clicked)
         
@@ -238,9 +236,9 @@ class LoginWindow(tk.Tk):
         self.employee_entry.bind("<FocusIn>", lambda event :self.clear_placeholder(event = event,isCustomer=False))
         self.employee_entry.bind("<FocusOut>", lambda event: self.restore_placeholder(event=event,isCustomer=False))
           
-        self.employees_dropdown = ttk.Combobox(self.buttons_frame, values=self.free_employees, state="readonly",foreground=self.white, background=self.royal_blue)
-        self.assign_to_button = tk.Button(self.buttons_frame, text="Assign-to",fg=self.white, bg=self.royal_blue,command=self.assign_customer_to_employee)
-        self.mark_as_free_button = tk.Button(self.buttons_frame, text="Mark as Free",fg=self.white, bg=self.royal_blue, command=self.mark_as_free)
+        self.employees_dropdown = ttk.Combobox(self.buttons_frame, values=self.free_employees, state="readonly",foreground=WHITE, background=ROYAL_BLUE)
+        self.assign_to_button = tk.Button(self.buttons_frame, text="Assign-to",fg=WHITE, bg=ROYAL_BLUE,command=self.assign_customer_to_employee)
+        self.mark_as_free_button = tk.Button(self.buttons_frame, text="Mark as Free",fg=WHITE, bg=ROYAL_BLUE, command=self.mark_as_free)
         self.grid_all_buttons()
 
     def update_next_in_line(self):
@@ -367,7 +365,7 @@ class LoginWindow(tk.Tk):
             messagebox.showerror("Login", "Invalid username or password!")
 
 class GraphResults(tk.Toplevel):
-    ROYAL_BLUE ="#08147d"
+    
     _instance = None
     def __new__(cls,*args,**kwargs):
         if cls._instance is None:
@@ -380,10 +378,15 @@ class GraphResults(tk.Toplevel):
         super().__init__(parent)
         self.title("Running Services for today")
         self.attributes("-topmost", True)
+        self.create_bar_graph(data)
+        self.create_table(actuals)
+        self.create_extract_buttons()
+
+    def create_bar_graph(self,data: pd.DataFrame):
         transposed_data = data.transpose()
 
-        self.figure: plt.Figure = plt.Figure(figsize=(6, 4))
-        self.axes: plt.Axes = self.figure.add_subplot(111)
+        self.figure = plt.Figure(figsize=(6, 4))
+        self.axes = self.figure.add_subplot(111)
 
         transposed_data.plot.bar(ax=self.axes,edgecolor='black', color=self.ROYAL_BLUE)
         self.axes.set_xticklabels(self.axes.get_xticklabels(), rotation=10)
@@ -393,20 +396,12 @@ class GraphResults(tk.Toplevel):
             y = rectangle.get_height() / 2  
             count_value = int(rectangle.get_height())  
             self.axes.text(x, y, count_value, ha='center', va='center',color="white")
-
-        # Create a canvas to display the graph
         self.canvas = FigureCanvasTkAgg(self.figure, master=self)
         self.canvas.draw()
-        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=False)
-
-        self.create_table(actuals)
-
-
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=False)    
         label = tk.Label(self, text="Click the Extract button to extract the data.")
         label.pack(pady=10)
 
-        extract_button = ttk.Button(self, text="Extract")
-        extract_button.pack()
     def create_table(self,df:pd.DataFrame):
         self.screen_width = self.winfo_screenwidth()
         self.screen_height = self.winfo_screenheight()
@@ -415,7 +410,6 @@ class GraphResults(tk.Toplevel):
 
         else:
             my_font = font.Font(size=8)
-        total_row = ["Total"] + df.sum().tolist()
 
         style = ttk.Style()
         style.configure("myCustom.Treeview",foreground="black",font=my_font)
@@ -442,6 +436,14 @@ class GraphResults(tk.Toplevel):
             self.actual_table.insert("", "end", text=f"{index} ({row_total})", values=row.tolist())
         self.actual_table.heading("#0", text="Employee Name (total)", anchor=tk.W)
         self.actual_table.pack(pady=10)
+
+    def create_extract_buttons(self):
+        button_style = ttk.Style()
+        button_style.configure("extractbuttons",fg=WHITE,bg=ROYAL_BLUE)
+
+        extract_button = ttk.Button(self, text="Extract")
+        extract_button.pack()
+
 
 if __name__ == "__main__":
     login_window = LoginWindow()
