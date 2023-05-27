@@ -368,9 +368,18 @@ class LoginWindow(tk.Tk):
 
 class GraphResults(tk.Toplevel):
     ROYAL_BLUE ="#08147d"
+    _instance = None
+    def __new__(cls,*args,**kwargs):
+        if cls._instance is None:
+            cls._instance = cls
+            return super().__new__(cls)
+        else:
+            return cls._instance
+
     def __init__(self, parent: tk.Tk, data: pd.DataFrame,actuals:pd.DataFrame):
         super().__init__(parent)
         self.title("Running Services for today")
+        self.attributes("-topmost", True)
         transposed_data = data.transpose()
 
         self.figure: plt.Figure = plt.Figure(figsize=(6, 4))
@@ -402,10 +411,11 @@ class GraphResults(tk.Toplevel):
         self.screen_width = self.winfo_screenwidth()
         self.screen_height = self.winfo_screenheight()
         if self.screen_height > 900:
-            my_font = font.Font(size=10)
+            my_font = font.Font(size=12)
 
         else:
             my_font = font.Font(size=8)
+        total_row = ["Total"] + df.sum().tolist()
 
         style = ttk.Style()
         style.configure("myCustom.Treeview",foreground="black",font=my_font)
@@ -414,15 +424,23 @@ class GraphResults(tk.Toplevel):
         self.actual_table = ttk.Treeview(self,style="myCustom.Treeview")
         self.actual_table["columns"] = df.columns.tolist()
         self.actual_table.configure(height=5)
+        counter = 0
         for column in df.columns:
             column_name = column
-            column_width = 100
+            if counter == 4:
+                column_width = 140
+            elif counter == 5:
+                column_width = 70
+            else: 
+                column_width = 90        
             self.actual_table.heading(column, text=column_name, anchor=tk.W)
             self.actual_table.column(column, width=column_width, anchor=tk.W)
+            counter +=1
 
         for index, row in df.iterrows():
-            self.actual_table.insert("", "end", text=index, values=row.tolist())
-
+            row_total = sum(row)
+            self.actual_table.insert("", "end", text=f"{index} ({row_total})", values=row.tolist())
+        self.actual_table.heading("#0", text="Employee Name (total)", anchor=tk.W)
         self.actual_table.pack(pady=10)
 
 if __name__ == "__main__":
