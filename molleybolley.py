@@ -36,8 +36,15 @@ class LoginWindow(tk.Tk):
         self.screen_width = self.winfo_screenwidth()
         self.screen_height = self.winfo_screenheight()
         try:
-            self.buttons_width = int(self.screen_width*0.01)
-            self.large_font = font.Font(size=25)  
+            if self.screen_height > 900:
+                self.large_font = font.Font(size=25)
+                self.buttons_width = int(self.screen_width*0.01)
+
+            else:
+                self.large_font = font.Font(size=18)
+                self.buttons_width = int(self.screen_width*0.015)
+                
+            
 
             self.customer_entry.configure(font=self.large_font, width=self.buttons_width)
             self.services_dropdown.configure(font=self.large_font, width=self.buttons_width)
@@ -50,13 +57,9 @@ class LoginWindow(tk.Tk):
                                          width=self.buttons_width,height=3)
             self.next_info.configure(font=self.large_font,bg=self.frozen_white, width=self.buttons_width)
 
-
-
-            self.wait_list.tag_configure('large_font', font=self.large_font)
-            self.employee_list.tag_configure('large_font', font=self.large_font)
-
-            row_height = self.large_font.metrics("linespace") + 4 
+            row_height = self.large_font.metrics("linespace") + 5 
             self.style.configure("Custom.Treeview", rowheight=row_height, font=self.large_font)
+            self.employee_list.configure(height=5)
             self.style.configure("Custom.Treeview.Heading", font=self.large_font,background=self.royal_blue,foreground=self.white)
         except AttributeError:
             pass
