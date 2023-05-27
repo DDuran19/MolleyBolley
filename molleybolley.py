@@ -71,6 +71,9 @@ class LoginWindow(tk.Tk):
 
             row_height = self.large_font.metrics("linespace") + 4 
             self.style.configure("Custom.Treeview", rowheight=row_height, font=self.large_font)
+            self.style.map("Custom.Treeview.Heading",
+                 background=[("active", ROYAL_BLUE),  
+                             ("hover", WHITE)])
             self.employee_list.configure(height=5)
             self.style.configure("Custom.Treeview.Heading", font=self.large_font,background=ROYAL_BLUE,foreground=WHITE)
         except AttributeError:
@@ -388,19 +391,18 @@ class GraphResults(tk.Toplevel):
         self.figure = plt.Figure(figsize=(6, 4))
         self.axes = self.figure.add_subplot(111)
 
-        transposed_data.plot.bar(ax=self.axes,edgecolor='black', color=self.ROYAL_BLUE)
+        transposed_data.plot.bar(ax=self.axes,edgecolor='black', color=ROYAL_BLUE)
         self.axes.set_xticklabels(self.axes.get_xticklabels(), rotation=10)
 
         for rectangle in self.axes.patches:
             x = rectangle.get_x() + rectangle.get_width() / 2
             y = rectangle.get_height() / 2  
             count_value = int(rectangle.get_height())  
-            self.axes.text(x, y, count_value, ha='center', va='center',color="white")
+            self.axes.text(x, y, count_value, ha='center', va='center',color=WHITE)
         self.canvas = FigureCanvasTkAgg(self.figure, master=self)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=False)    
-        label = tk.Label(self, text="Click the Extract button to extract the data.")
-        label.pack(pady=10)
+
 
     def create_table(self,df:pd.DataFrame):
         self.screen_width = self.winfo_screenwidth()
@@ -413,7 +415,10 @@ class GraphResults(tk.Toplevel):
 
         style = ttk.Style()
         style.configure("myCustom.Treeview",foreground="black",font=my_font)
-        style.configure("myCustom.Treeview.Heading", background=self.ROYAL_BLUE, foreground="white",font=my_font)
+        style.configure("myCustom.Treeview.Heading", background=ROYAL_BLUE, foreground="WHITE",font=my_font)
+        style.map("myCustom.Treeview.Heading",
+                 background=[("active", ROYAL_BLUE),  
+                             ("hover", WHITE)])
         
         self.actual_table = ttk.Treeview(self,style="myCustom.Treeview")
         self.actual_table["columns"] = df.columns.tolist()
@@ -436,13 +441,26 @@ class GraphResults(tk.Toplevel):
             self.actual_table.insert("", "end", text=f"{index} ({row_total})", values=row.tolist())
         self.actual_table.heading("#0", text="Employee Name (total)", anchor=tk.W)
         self.actual_table.pack(pady=10)
+        label = tk.Label(self, text="Click the Extract button to extract the data.")
+        label.pack(pady=10)
 
     def create_extract_buttons(self):
+        extract_frame = tk.Frame(self,bg=WHITE)
+        extract_frame.pack(pady=10)
         button_style = ttk.Style()
-        button_style.configure("extractbuttons",fg=WHITE,bg=ROYAL_BLUE)
+        button_style.configure("Extract.TButton",foreground=WHITE,background=ROYAL_BLUE)
+        button_style.map("Extract.TButton",
+                 background=[("active", "green"),  
+                             ("hover", ROYAL_BLUE)])
 
-        extract_button = ttk.Button(self, text="Extract")
-        extract_button.pack()
+        extract_running = ttk.Button(extract_frame, text="Extract Running Today",style="Extract.TButton")
+        extract_7days = ttk.Button(extract_frame, text="Extract Last 7 Days",style="Extract.TButton")
+        extract_30days = ttk.Button(extract_frame, text="Extract Last 30 Days",style="Extract.TButton")
+        extract_all = ttk.Button(extract_frame, text="Extract all",style="Extract.TButton")
+        extract_running.grid(row=0, column=0, padx = 5,sticky=NORTHEASTWEST)
+        extract_7days.grid(row=0, column=1, padx = 5,sticky=NORTHEASTWEST)
+        extract_30days.grid(row=0, column=2, padx = 5,sticky=NORTHEASTWEST)
+        extract_all.grid(row=0,column=3, padx = 5,sticky=NORTHEASTWEST)
 
 
 if __name__ == "__main__":
