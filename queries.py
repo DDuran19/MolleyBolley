@@ -18,10 +18,14 @@ class Login_query:
             cursor.execute(search_username, (username,))
             row = cursor.fetchone()
             if not row:
-                return None
+                messagebox.showerror("Login", "Invalid username or password!")
+                return None            
             hashed_password = row[2]
+            if not self.check_password(password, hashed_password):
+                messagebox.showerror("Login", "Invalid username or password!")
+                return None
             role = row[3]
-            return (self.check_password(password, hashed_password),role)
+            return (True,role)
 
     def encrypt_pw(self,pw:str):
         key=b'$2b$12$w./mmhOqxj0PLd8gxrTpfe'
@@ -82,10 +86,11 @@ class Login_query:
                 messagebox.showerror("Error in deleting user",e)
                 return False
     
-    def get_all_username(self):
+    def get_all_username(self, isAdmin = 3):
         with sqlite3.connect(self.DATABASE_PATH) as db:
             cursor = db.cursor()
-            select_all_usernames = 'SELECT username FROM user_accounts'
+            select_all_usernames = f'SELECT username FROM user_accounts WHERE isAdmin < {isAdmin}'
+
             try:
                 cursor.execute(select_all_usernames)
                 rows = cursor.fetchall()
@@ -307,28 +312,29 @@ class Employees:
             except Exception as e:
                 print("Error retrieving all employees:", e)
                 return []
-    def add_employee(self, employee_name):
+    def add_employee(self, employee_name, username):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
-            insert_query = 'INSERT INTO employees (employee_name, isFree) VALUES (?, ?)'
+            insert_query = 'INSERT INTO employees (employee_name, isFree, username) VALUES (?, ?, ?)'
             try:
-                cursor.execute(insert_query, (employee_name, "Free"))
+                cursor.execute(insert_query, (employee_name, "Free", username))
                 db.commit()
                 print("Employee added successfully.")
             except Exception as e:
                 db.rollback()
                 print("Error adding employee:", e)
-    def delete_employee(self, employee_id):
+
+    def delete_employee(self, username):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
-            delete_query = 'DELETE FROM employees WHERE id = ?'
+            delete_query = 'DELETE FROM employees WHERE username = ?'
             try:
-                cursor.execute(delete_query, (employee_id,))
+                cursor.execute(delete_query, (username,))
                 db.commit()
-                print("Employee deleted successfully.")
+                messagebox.showinfo("Successful!","Employee deleted successfully.")
             except Exception as e:
                 db.rollback()
-                print("Error deleting employee:", e)
+                messagebox.showinfo("Error deleting employee", e)
     def update_employee(self, employee_id, new_name, is_free):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
