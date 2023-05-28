@@ -289,6 +289,20 @@ class LoginWindow(tk.Tk):
 
     def mark_as_free(self):
         employee = self.employee_list.focus()
+        services_by_customer = self.employee_list.item(employee)['values']
+        services = ["manicure", "pedicure",
+                    "threading", "haircut",
+                    "hairtreatment", "other"]
+        service_dict = {}
+        for service in services:
+            if service in services_by_customer[0]:
+                service_dict[service]=1
+
+        ServicePopup(self,False,self.gather_services_completed_by_employee,
+                               employee,**service_dict)
+        
+    def gather_services_completed_by_employee(self):
+        employee = self.employee_list.focus()
         self.update_employee_list(employee,EMPTY,FREE)
         query = Employees()
         query.update_employee_status(employee,FREE)
@@ -514,10 +528,12 @@ class ServicePopup(tk.Toplevel):
         super().__init__(parent)
         self.get_value_from_popup=get_value_from_popup
         self.attributes("-topmost", True)
+        self.isCustomer = isCustomer
+        self.name = name
         if isCustomer:
             self.title(f"New Customer - {name}")
         else: self.title(f"Services completed - {name}")
-        self.geometry("450x200")
+        self.geometry("400x280")
         self.configure(background=WHITE)
         self.manicure = manicure
         self.pedicure  = pedicure
@@ -533,7 +549,7 @@ class ServicePopup(tk.Toplevel):
         super().destroy()
     
     def setup_frame(self):
-        frame = tk.Frame(self)
+        frame = tk.Frame(self, background=WHITE, bg = WHITE)
         frame.pack()
 
         attributes = ["Manicure", "Pedicure", "Threading", "Haircut", "HairTreatment", "Other"]
@@ -541,16 +557,15 @@ class ServicePopup(tk.Toplevel):
 
         # Create checkboxes for attributes
         for i, attribute in enumerate(attributes):
-            checkbox = tk.Checkbutton(frame, text=attribute, command=lambda attr=attribute: self.update_attribute(attr))
+            checkbox = tk.Checkbutton(frame, text=attribute, command=lambda attr=attribute: self.update_attribute(attr), 
+                                      font=font.Font(size=20), height=2,background=WHITE)
             checkboxes.append(checkbox)
 
-            # Determine grid position based on row and column
-            row = i // 3
-            col = i % 3
+            row = i // 2
+            col = i % 2
 
-            checkbox.grid(row=row, column=col, padx=10, pady=5)
+            checkbox.grid(row=row, column=col, padx=5, pady=0, sticky="w")
 
-        # Set the checkbox values based on the initial attribute values
         checkboxes[0].select() if self.manicure == 1 else checkboxes[0].deselect()
         checkboxes[1].select() if self.pedicure == 1 else checkboxes[1].deselect()
         checkboxes[2].select() if self.threading == 1 else checkboxes[2].deselect()
@@ -559,8 +574,9 @@ class ServicePopup(tk.Toplevel):
         checkboxes[5].select() if self.other == 1 else checkboxes[5].deselect()
 
         # Create the Submit button
-        submit_button = tk.Button(self, text="Submit", command=self.on_submit, bg="#08147d", fg="white")
+        submit_button = tk.Button(self, text="Submit", command=self.on_submit, bg="#08147d", fg="white", height=2, width=20)
         submit_button.pack(pady=10)
+
 
     def update_attribute(self, attribute):
         checkbox_value = 1 if getattr(self, attribute.lower()) == 0 else 0
@@ -576,8 +592,15 @@ class ServicePopup(tk.Toplevel):
             "hairtreatment": self.hairtreatment,
             "other": self.other
         }
-        if sum(self.checkbox_values.values()):
-            self.get_value_from_popup(self.checkbox_values)
+        if self.isCustomer:
+            if sum(self.checkbox_values.values()):
+                self.get_value_from_popup(self.checkbox_values)
+        else: 
+            query = Update_services()
+            for service_name, value in self.checkbox_values.items():
+                if value == 1:
+                    query.update(self.name,TODAY,service_name)
+            self.get_value_from_popup()
         self.destroy()
 
 if __name__ == "__main__":
