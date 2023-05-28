@@ -22,6 +22,7 @@ DOUBLE_LEFT_CLICK = "<Double-1>"
 TODAY = datetime.datetime.today().date()
 WHITE = "#ffffff"
 ROYAL_BLUE ="#08147d"
+READONLY = "readonly"
 
 def center_window(window):
     window.update_idletasks()
@@ -163,6 +164,7 @@ class LoginWindow(tk.Tk):
         self.workarea.grid(row=1, column=0, sticky="nsew")
 
         self.main_frame.grid_rowconfigure(1, weight=1)
+
     def create_ttk_trees(self):
         self.trees = tk.Frame(self.workarea, bg=WHITE)
         self.trees.grid(row=0, column=0, sticky="w")
@@ -212,10 +214,9 @@ class LoginWindow(tk.Tk):
         for employee, values in self.employees.items():
             self.employee_list.insert(EMPTY,tk.END,values=values, iid=employee,text=employee)
 
-
     def create_buttons_frame(self):
         self.buttons_frame = tk.Frame(self.workarea, bg=WHITE)
-        self.buttons_frame.grid(row=0, column=1, padx=5,sticky="n")
+        self.buttons_frame.grid(row=0, column=1, padx=5,pady=0, sticky="n")
         
         self.customer_entry = ttk.Entry(self.buttons_frame)
         self.customer_entry.insert(0, "Enter customer name")
@@ -226,11 +227,33 @@ class LoginWindow(tk.Tk):
         self.next_info = tk.Label(self.buttons_frame, text="Next in Line: ")
         self.next_in_line = tk.Label(self.buttons_frame)
           
-        self.employees_dropdown = ttk.Combobox(self.buttons_frame, values=self.free_employees, state="readonly",foreground=WHITE, background=ROYAL_BLUE)
+        self.employees_dropdown = ttk.Combobox(self.buttons_frame, values=self.free_employees, state=READONLY,foreground=WHITE, background=ROYAL_BLUE)
         self.assign_to_button = tk.Button(self.buttons_frame, text="Assign-to",fg=WHITE, bg=ROYAL_BLUE,command=self.assign_customer_to_employee)
         self.mark_as_free_button = tk.Button(self.buttons_frame, text="Mark as Free",fg=WHITE, bg=ROYAL_BLUE, command=self.mark_as_free)
         self.grid_all_buttons()
+        self.insert_survey_and_facebook()
 
+    def insert_survey_and_facebook(self):
+        self.socials_frame = tk.Frame(self.buttons_frame, bg="white")
+        self.socials_frame.grid(row=9, column=0, padx=5, sticky="n")
+
+        # Add survey logo
+        self.survey_logo = Image.open("images/survey.png")
+        icon_width = int(self.screen_width * 0.13)
+        self.survey_logo = self.survey_logo.resize((icon_width, icon_width)) 
+        self.converted_survey_logo = ImageTk.PhotoImage(self.survey_logo)
+        self.survey_label = tk.Label(self.socials_frame, image=self.converted_survey_logo, bg="white")
+        self.survey_label.pack()
+        # Add Facebook logo and text
+        self.facebook_logo = Image.open("images/facebook_icon.png")
+        self.facebook_logo = self.facebook_logo.resize((40, 40)) 
+        self.converted_facebook_logo = ImageTk.PhotoImage(self.facebook_logo)
+        self.facebook_label = tk.Label(self.socials_frame, image=self.converted_facebook_logo, bg="white")
+        self.facebook_label.pack(side="left")
+
+        facebook_text = "fb.com/MoleyBoley2000"
+        self.facebook_text_label = tk.Label(self.socials_frame, text=facebook_text, bg="white",font=self.large_font)
+        self.facebook_text_label.pack(side="left")
     def update_next_in_line(self):
         try:
             first_item = self.wait_list.item(self.wait_list.get_children()[0])
@@ -348,14 +371,16 @@ class LoginWindow(tk.Tk):
         if self.username == EMPTY or password == EMPTY: return
         query=Login_query()
         result = query.login(self.username,password)
-
-        if result[0]:
-            messagebox.showinfo("Login", "Login successful!")
-            self.frame.destroy()
-            self.create_main_frame()
-            self.isAdmin=result[1]
-        else:
-            messagebox.showerror("Login", "Invalid username or password!")
+        if result is None:
+            return
+        if not result[0]:
+            return
+        messagebox.showinfo("Login", f"Login successful!\n Welcome Back {self.username}")
+        self.frame.destroy()
+        self.create_main_frame()
+        self.isAdmin=result[1]
+    
+            
 
 class GraphResults(tk.Toplevel):
     
@@ -607,6 +632,7 @@ class ServicePopup(tk.Toplevel):
 class AdminPanel(tk.Toplevel):
     _instance = None
     button_style = {"foreground": WHITE, "background": ROYAL_BLUE, "width":20}
+
     def __new__(cls,*args,**kwargs):
         if not cls._instance:
             cls._instance = cls
@@ -619,7 +645,7 @@ class AdminPanel(tk.Toplevel):
         self.attributes("-topmost", True)
         self.isAdmin:int = isAdmin
         self.username = username
-        self.geometry(f"{'820x370' if isAdmin else '400x330'}")
+        self.geometry(f"{'850x400' if isAdmin else '400x350'}")
         self.configure(background=WHITE)
         self.get_usernames()
         center_window(self)
@@ -628,7 +654,9 @@ class AdminPanel(tk.Toplevel):
 
     def get_usernames(self):
         query = Login_query()
-        self.usernames = query.get_all_username()
+        
+        self.usernames = query.get_all_username(self.isAdmin)
+        self.usernames.append(self.username)
     def destroy(self):
             type(self)._instance = None
             super().destroy()
@@ -639,51 +667,58 @@ class AdminPanel(tk.Toplevel):
         main = tk.Frame(self,background=WHITE)
         main.grid(row=0,column=0,padx=10)
 
+        if self.isAdmin:
+            self.username_var = tk.StringVar()
+            username_dropdown = ttk.Combobox(main, values = self.usernames, textvariable=self.username_var,state=READONLY,font=font_style, width=20)
+            username_dropdown.grid(row=0, column=0, pady=10)
+            default_value = self.username
+            username_dropdown.set(default_value)
+
+            self.adminmode = tk.Frame(self,background=WHITE)
+            self.adminmode.grid(row=0, column=1,sticky=NORTHEASTWEST,padx=10)
+            create_new_employee_label = tk.Label(self.adminmode, text="Create New Employee", **self.Entry_style)
+            create_new_employee_label.grid(row=0, column=0, columnspan=2)
+
+            employee_namelabel = tk.Label(self.adminmode, text="Write new employee name:",background=WHITE)
+            employee_namelabel.grid(row=1, column=0, sticky=tk.E)
+            self.employee_name = tk.Entry(self.adminmode, **self.Entry_style)
+            self.employee_name.grid(row=1, column=1)
+
+            username_label = tk.Label(self.adminmode, text="Username:",background=WHITE)
+            username_label.grid(row=2, column=0, sticky=tk.E)
+            self.usernameEntry = tk.Entry(self.adminmode, **self.Entry_style)
+            self.usernameEntry.grid(row=2, column=1)
+
+            password1_label = tk.Label(self.adminmode, text="Password:",background=WHITE)
+            password1_label.grid(row=3, column=0, sticky=tk.E)
+            self.password1 = tk.Entry(self.adminmode, show="*", **self.Entry_style)
+            self.password1.grid(row=3, column=1)
+
+            password2_label = tk.Label(self.adminmode, text="Confirm Password:",background=WHITE)
+            password2_label.grid(row=4, column=0, sticky=tk.E)
+            self.password2 = tk.Entry(self.adminmode, show="*", **self.Entry_style)
+            self.password2.grid(row=4, column=1)
+
+            self.role_checkbox_var = tk.BooleanVar()
+
+            role_checkbox = tk.Checkbutton(self.adminmode, text="Add admin privileges?", background=WHITE,
+                               variable=self.role_checkbox_var, command=self.set_admin_privileges)
+            role_checkbox.grid(row=5, column=1, sticky=tk.W)
+
+
+            create_employee_button = tk.Button(self.adminmode, text="Create New Employee", **self.button_style,command=self.create_new_employee)
+            create_employee_button.grid(row=6, column=0, columnspan=2)
+
         if self.isAdmin==2:
             self.current_role_checkbox_var = tk.BooleanVar()
             self.current_role_checkbox = tk.Checkbutton(main, text="Admin", background=WHITE,
                                variable=self.current_role_checkbox_var, command=self.change_password,font=("TkDefaultFont", 15))
             self.current_role_checkbox.grid(row = 2,column = 0,pady = 0)
-
-        if self.isAdmin:
-            self.username_var = tk.StringVar()
-            username_dropdown = ttk.Combobox(main, values = self.usernames, textvariable=self.username_var, font=font_style, width=20)
-            username_dropdown.grid(row=0, column=0, pady=10)
-
-            adminmode = tk.Frame(self,background=WHITE)
-            adminmode.grid(row=0, column=1,sticky=NORTHEASTWEST,padx=10)
-            create_new_employee_label = tk.Label(adminmode, text="Create New Employee", **self.Entry_style)
-            create_new_employee_label.grid(row=0, column=0, columnspan=2)
-
-            employee_namelabel = tk.Label(adminmode, text="Write new employee name:",background=WHITE)
-            employee_namelabel.grid(row=1, column=0, sticky=tk.E)
-            employee_name = tk.Entry(adminmode, **self.Entry_style)
-            employee_name.grid(row=1, column=1)
-
-            username_label = tk.Label(adminmode, text="Username:",background=WHITE)
-            username_label.grid(row=2, column=0, sticky=tk.E)
-            username = tk.Entry(adminmode, **self.Entry_style)
-            username.grid(row=2, column=1)
-
-            password1_label = tk.Label(adminmode, text="Password:",background=WHITE)
-            password1_label.grid(row=3, column=0, sticky=tk.E)
-            password1 = tk.Entry(adminmode, show="*", **self.Entry_style)
-            password1.grid(row=3, column=1)
-
-            password2_label = tk.Label(adminmode, text="Confirm Password:",background=WHITE)
-            password2_label.grid(row=4, column=0, sticky=tk.E)
-            password2 = tk.Entry(adminmode, show="*", **self.Entry_style)
-            password2.grid(row=4, column=1)
-
-            self.role_checkbox_var = tk.BooleanVar()
-
-            role_checkbox = tk.Checkbutton(adminmode, text="Add admin privileges?", background=WHITE,
-                               variable=self.role_checkbox_var, command=self.set_admin_privileges)
-            role_checkbox.grid(row=5, column=1, sticky=tk.W)
-
-
-            create_employee_button = tk.Button(adminmode, text="Create New Employee", **self.button_style,command=self.create_new_employee)
-            create_employee_button.grid(row=6, column=0, columnspan=2)
+            self.username_delete_dropdown_var = tk.StringVar()
+            self.username_delete_dropdown = ttk.Combobox(self.adminmode, state=READONLY, values = self.usernames, textvariable=self.username_delete_dropdown_var, font=font_style, width=20)
+            self.username_delete_dropdown.grid(row=7, column=1, pady=10)
+            delete_employee = tk.Button(self.adminmode, text="Delete Employee", **self.button_style,command=self.delete_employee)
+            delete_employee.grid(row=8, column=1, sticky="w")
 
         change_password_label = tk.Label(main,text="Change password below", **self.Entry_style)
         change_password_label.grid(row = 1, column = 0, pady=(0,5),sticky=NORTHEASTWEST)
@@ -705,17 +740,59 @@ class AdminPanel(tk.Toplevel):
         self.newrole = int(self.role_checkbox_var.get())
 
     def passwords_match(self, password1, password2):
-        if any([password1,password2]):
+        
+        if not any([password1,password2]):
+            toggle_topmost(self)
             messagebox.showerror("Not allowed!","Password shouldn't be blank!")
+            toggle_topmost(self)
             return False
         if password1 != password2:
+            toggle_topmost(self)
             messagebox.showerror("Error", "Passwords do not match!")
+            toggle_topmost(self)
             return False
         return True
 
-    def create_new_employee(self, username, password1, password2):
-        self.passwords_match(password1, password2)
-        # Add code to create a new employee with the given username and password
+    def create_new_employee(self):
+        if not self.usernameEntry.get() or not self.employee_name.get():
+            toggle_topmost(self)
+            messagebox.showerror("Cannot be blank", "username/employee name is required!")
+            toggle_topmost(self)
+            return
+        password1 = self.password1.get()
+        password2 = self.password2.get()
+        username = self.usernameEntry.get()
+        if not self.passwords_match(password1, password2):
+            return
+        query = Login_query()
+        toggle_topmost(self)
+        if query.add_user(username,password1,self.role_checkbox_var.get()):
+            self.usernameEntry.delete(0,END)
+            self.password1.delete(0,END)
+            self.password2.delete(0,END)
+
+        toggle_topmost(self)
+
+        query = Employees()
+        if query.add_employee(self.employee_name.get(),username):
+            self.employee_name.delete(0, END)
+
+    def delete_employee(self):
+        username = self.username_delete_dropdown_var.get()
+        if not username:
+            return
+
+        toggle_topmost(self)
+        query = Login_query()
+        if query.delete_user(username):
+            self.username_delete_dropdown["values"] = tuple(
+                value for value in self.username_delete_dropdown["values"] if value != username)
+            self.username_delete_dropdown_var.set("")
+        query = Employees()
+        query.delete_employee(username)
+        toggle_topmost(self)
+
+
     def get_username(self):
         return self.username_var.get()
     def change_password(self, password1, password2):
@@ -729,10 +806,15 @@ class AdminPanel(tk.Toplevel):
         role_change = None
         if self.isAdmin==2:
             role_change = self.current_role_checkbox_var.get()
+
+        if username_to_be_changed == self.username:
+            role_change = None    
         toggle_topmost(self)
+        messagebox.showinfo("Information","You are about to change password. \nIf you are an administrator, please note that you can NOT change your own role. \nThe admin checkbox will not work.")
         if query.change_password(username_to_be_changed,password1,role_change):
-            self.password_entry.delete(0, tk.END)
-            self.confirm_password_entry.delete(0, tk.END)
+            self.password_entry.delete(0, END)
+            self.confirm_password_entry.delete(0, END)
+
         toggle_topmost(self)
 
 
