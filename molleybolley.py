@@ -31,6 +31,12 @@ def center_window(window):
     y = (window.winfo_screenheight() // 2) - (height // 2)
     window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
+def toggle_topmost(window):
+    if window.attributes("-topmost"):
+        window.attributes("-topmost", False)
+    else:
+        window.attributes("-topmost", True)
+
 class LoginWindow(tk.Tk):
     app_title="MOLEYBOLEY"
     image_header = Image.open("images/business_logo.jpg")
@@ -151,7 +157,7 @@ class LoginWindow(tk.Tk):
         app_label.bind(LEFT_CLICK, self.show_admin_panel)
         header.grid_rowconfigure(0, weight=1)
     def show_admin_panel(self,_):
-        AdminPanel(self,self.isAdmin)
+        AdminPanel(self,self.isAdmin,self.username)
     def create_two_sub_frames(self):
         self.workarea = tk.Frame(self.main_frame, bg=WHITE)
         self.workarea.grid(row=1, column=0, sticky="nsew")
@@ -337,11 +343,11 @@ class LoginWindow(tk.Tk):
         messagebox.showinfo("Forgot Password", "Please contact the administrator for assistance.")
 
     def login(self,event):
-        username = self.username_entry.get()
+        self.username = self.username_entry.get()
         password = self.password_entry.get()
-        if username == EMPTY or password == EMPTY: return
+        if self.username == EMPTY or password == EMPTY: return
         query=Login_query()
-        result = query.login(username,password)
+        result = query.login(self.username,password)
 
         if result[0]:
             messagebox.showinfo("Login", "Login successful!")
@@ -457,43 +463,43 @@ class GraphResults(tk.Toplevel):
         extract_all.grid(row=0,column=3, padx = 5,sticky=NORTHEASTWEST)
 
     def extract_running(self):
-        self.toggle_topmost()
+        toggle_topmost(self)
         query = ExportData()
         default_file_name = f'Running_data_for_{TODAY}.xlsx'
         filepath = self.ask_where_to_save(default_file_name)
         result = query.export_to_excel(filepath,start_date=TODAY)
         self.info_on_result(result)
-        self.toggle_topmost()
+        toggle_topmost(self)
 
 
     def extract_last_seven_days(self):
-        self.toggle_topmost()
+        toggle_topmost(self)
         query = ExportData()
         seven_days_ago = TODAY - datetime.timedelta(days=7)
         default_file_name = f'Data_from_{seven_days_ago}_until_{TODAY}.xlsx'
         filepath = self.ask_where_to_save(default_file_name)
         result = query.export_to_excel(filepath,seven_days_ago,TODAY)
         self.info_on_result(result)
-        self.toggle_topmost()
+        toggle_topmost(self)
 
     def extract_last_thirty_days(self):
-        self.toggle_topmost()
+        toggle_topmost(self)
         query = ExportData()
         thirty_days_ago = TODAY - datetime.timedelta(days=30)
         default_file_name = f'Data_from_{thirty_days_ago}_until_{TODAY}.xlsx'
         filepath = self.ask_where_to_save(default_file_name)
         result = query.export_to_excel(filepath,thirty_days_ago,TODAY)
         self.info_on_result(result)
-        self.toggle_topmost()
+        toggle_topmost(self)
 
     def extract_all(self):
-        self.toggle_topmost()
+        toggle_topmost(self)
         query = ExportData()
         default_file_name = f'All_data_Extracted_{TODAY}.xlsx'
         filepath = self.ask_where_to_save(default_file_name)
         result = query.export_to_excel(filepath)
         self.info_on_result(result)
-        self.toggle_topmost()
+        toggle_topmost(self)
 
     
     def ask_where_to_save(self,default_file_name):
@@ -507,11 +513,7 @@ class GraphResults(tk.Toplevel):
         else:
             messagebox.showinfo("Failed",f"Something went wrong: {result[1]}")
         
-    def toggle_topmost(self):
-        if self.attributes("-topmost"):
-            self.attributes("-topmost", False)
-        else:
-            self.attributes("-topmost", True)
+
 
 class ServicePopup(tk.Toplevel):
     _instance = None
@@ -611,16 +613,22 @@ class AdminPanel(tk.Toplevel):
             return super().__new__(cls)
         else:
             return cls._instance
-    def __init__(self, parent:tk.Tk, isAdmin:int):
+    def __init__(self, parent:tk.Tk, isAdmin:int, username:str):
         super().__init__(parent)
         self.title(f"Settings Panel - {'Admin' if isAdmin else 'Normal'} mode")
         self.attributes("-topmost", True)
         self.isAdmin:int = isAdmin
-        self.geometry(f"{'820x370' if isAdmin else '400x350'}")
+        self.username = username
+        self.geometry(f"{'820x370' if isAdmin else '400x330'}")
         self.configure(background=WHITE)
+        self.get_usernames()
         center_window(self)
         self.create_widgets()
+        
 
+    def get_usernames(self):
+        query = Login_query()
+        self.usernames = query.get_all_username()
     def destroy(self):
             type(self)._instance = None
             super().destroy()
@@ -631,9 +639,15 @@ class AdminPanel(tk.Toplevel):
         main = tk.Frame(self,background=WHITE)
         main.grid(row=0,column=0,padx=10)
 
+        if self.isAdmin==2:
+            self.current_role_checkbox_var = tk.BooleanVar()
+            self.current_role_checkbox = tk.Checkbutton(main, text="Admin", background=WHITE,
+                               variable=self.current_role_checkbox_var, command=self.change_password,font=("TkDefaultFont", 15))
+            self.current_role_checkbox.grid(row = 2,column = 0,pady = 0)
+
         if self.isAdmin:
-            username_var = tk.StringVar()
-            username_dropdown = ttk.Combobox(main, textvariable=username_var, font=font_style, width=20)
+            self.username_var = tk.StringVar()
+            username_dropdown = ttk.Combobox(main, values = self.usernames, textvariable=self.username_var, font=font_style, width=20)
             username_dropdown.grid(row=0, column=0, pady=10)
 
             adminmode = tk.Frame(self,background=WHITE)
@@ -661,25 +675,39 @@ class AdminPanel(tk.Toplevel):
             password2 = tk.Entry(adminmode, show="*", **self.Entry_style)
             password2.grid(row=4, column=1)
 
-            create_employee_button = tk.Button(adminmode, text="Create New Employee", **self.button_style)
-            create_employee_button.grid(row=5, column=0, columnspan=2)
+            self.role_checkbox_var = tk.BooleanVar()
+
+            role_checkbox = tk.Checkbutton(adminmode, text="Add admin privileges?", background=WHITE,
+                               variable=self.role_checkbox_var, command=self.set_admin_privileges)
+            role_checkbox.grid(row=5, column=1, sticky=tk.W)
+
+
+            create_employee_button = tk.Button(adminmode, text="Create New Employee", **self.button_style,command=self.create_new_employee)
+            create_employee_button.grid(row=6, column=0, columnspan=2)
 
         change_password_label = tk.Label(main,text="Change password below", **self.Entry_style)
         change_password_label.grid(row = 1, column = 0, pady=(0,5),sticky=NORTHEASTWEST)
 
-        password_entry = tk.Entry(main, show="*",**self.Entry_style)
-        password_entry.grid(row = 2, column = 0, pady = (10,0),sticky=NORTHEASTWEST)
-        
-        confirm_password_entry = ttk.Entry(main, show="*", **self.Entry_style )
-        confirm_password_entry.grid(row = 3, column = 0, pady = (0,10),sticky=NORTHEASTWEST)
+        self.password_entry = tk.Entry(main, show="*",**self.Entry_style)
+        self.password_entry.grid(row = 3, column = 0, pady = (0,0),sticky=NORTHEASTWEST)
 
-        change_password_btn = tk.Button(main, text="Change password", **self.button_style, font=font_style)
-        change_password_btn.grid(row = 4, column = 0, pady = 20,sticky=NORTHEASTWEST)
+        self.confirm_password_entry = ttk.Entry(main, show="*", **self.Entry_style )
+        self.confirm_password_entry.grid(row = 4, column = 0, pady = (0,10),sticky=NORTHEASTWEST)
+
+        change_password_btn = tk.Button(main, text=f'{"Change role and password" if self.isAdmin == 2 else "Change password"}', **self.button_style, font=font_style, 
+                                        command=lambda: self.change_password(self.password_entry.get(), self.confirm_password_entry.get()))
+        change_password_btn.grid(row = 5, column = 0, pady = 20,sticky=NORTHEASTWEST)
 
         exit_btn = tk.Button(main, text="Exit app", **self.button_style, font=font_style, command=self.exit_app)
-        exit_btn.grid(row = 5, column = 0, pady = 5)
+        exit_btn.grid(row = 6, column = 0, pady = 5)
+
+    def set_admin_privileges(self):
+        self.newrole = int(self.role_checkbox_var.get())
 
     def passwords_match(self, password1, password2):
+        if any([password1,password2]):
+            messagebox.showerror("Not allowed!","Password shouldn't be blank!")
+            return False
         if password1 != password2:
             messagebox.showerror("Error", "Passwords do not match!")
             return False
@@ -688,10 +716,26 @@ class AdminPanel(tk.Toplevel):
     def create_new_employee(self, username, password1, password2):
         self.passwords_match(password1, password2)
         # Add code to create a new employee with the given username and password
-
+    def get_username(self):
+        return self.username_var.get()
     def change_password(self, password1, password2):
-        self.passwords_match(password1, password2)
-        # Add code to change the password
+        if not self.passwords_match(password1, password2):
+            return
+        username_to_be_changed = self.username 
+        if self.isAdmin:
+            username_to_be_changed = self.get_username()
+        query = Login_query()
+        
+        role_change = None
+        if self.isAdmin==2:
+            role_change = self.current_role_checkbox_var.get()
+        toggle_topmost(self)
+        if query.change_password(username_to_be_changed,password1,role_change):
+            self.password_entry.delete(0, tk.END)
+            self.confirm_password_entry.delete(0, tk.END)
+        toggle_topmost(self)
+
+
     def exit_app(self):
         self.quit()
 if __name__ == "__main__":
