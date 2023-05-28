@@ -1,4 +1,3 @@
-import json
 import tkinter as tk
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -6,7 +5,7 @@ import datetime
 
 from queries import Data_analysis,Login_query,Update_services, Employees, ExportData,Create_Entry_For_Today
 
-from tkinter import filedialog
+from tkinter import Misc, filedialog
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import font
@@ -38,6 +37,7 @@ class LoginWindow(tk.Tk):
     business_logo = None
     app_label = None
     service_data_to_be_updated:dict = {}
+    isAdmin = 0
 
     def __init__(self):
         super().__init__()
@@ -66,8 +66,6 @@ class LoginWindow(tk.Tk):
                 self.large_font = font.Font(size=18)
                 self.buttons_width = int(self.screen_width*0.015)
                 
-            
-
             self.customer_entry.configure(font=self.large_font, width=self.buttons_width)
             self.employees_dropdown.configure(font=self.large_font, width=self.buttons_width)
             self.assign_to_button.configure(font=self.large_font, width=self.buttons_width)
@@ -103,7 +101,6 @@ class LoginWindow(tk.Tk):
     def create_login_frame(self):
         self.frame = tk.Frame(self, bg=ROYAL_BLUE,padx=50,pady=15, highlightthickness=4, highlightbackground="silver",relief='ridge')
         self.frame.place(relx=0.5, rely=0.5, anchor="center")
-
 
         self.username_label = tk.Label(self.frame, text="Username:", bg=ROYAL_BLUE, fg=WHITE)
         self.username_label.grid(row=0, column=0, sticky="e")
@@ -151,9 +148,10 @@ class LoginWindow(tk.Tk):
         self.business_logo =ImageTk.PhotoImage(self.image_header)
         app_label = tk.Label(header, image=self.business_logo)
         app_label.grid(row=0, column=0, padx=10, pady=0)
-
+        app_label.bind(LEFT_CLICK, self.show_admin_panel)
         header.grid_rowconfigure(0, weight=1)
-    
+    def show_admin_panel(self,_):
+        AdminPanel(self,self.isAdmin)
     def create_two_sub_frames(self):
         self.workarea = tk.Frame(self.main_frame, bg=WHITE)
         self.workarea.grid(row=1, column=0, sticky="nsew")
@@ -345,10 +343,11 @@ class LoginWindow(tk.Tk):
         query=Login_query()
         result = query.login(username,password)
 
-        if result:
+        if result[0]:
             messagebox.showinfo("Login", "Login successful!")
             self.frame.destroy()
             self.create_main_frame()
+            self.isAdmin=result[1]
         else:
             messagebox.showerror("Login", "Invalid username or password!")
 
@@ -603,6 +602,98 @@ class ServicePopup(tk.Toplevel):
             self.get_value_from_popup()
         self.destroy()
 
+class AdminPanel(tk.Toplevel):
+    _instance = None
+    button_style = {"foreground": WHITE, "background": ROYAL_BLUE, "width":20}
+    def __new__(cls,*args,**kwargs):
+        if not cls._instance:
+            cls._instance = cls
+            return super().__new__(cls)
+        else:
+            return cls._instance
+    def __init__(self, parent:tk.Tk, isAdmin:int):
+        super().__init__(parent)
+        self.title(f"Settings Panel - {'Admin' if isAdmin else 'Normal'} mode")
+        self.attributes("-topmost", True)
+        self.isAdmin:int = isAdmin
+        self.geometry(f"{'820x370' if isAdmin else '400x350'}")
+        self.configure(background=WHITE)
+        center_window(self)
+        self.create_widgets()
+
+    def destroy(self):
+            type(self)._instance = None
+            super().destroy()
+
+    def create_widgets(self):
+        font_style = ("TkDefaultFont", 20)
+        self.Entry_style={"font":font_style, "width":20, "background": WHITE}
+        main = tk.Frame(self,background=WHITE)
+        main.grid(row=0,column=0,padx=10)
+
+        if self.isAdmin:
+            username_var = tk.StringVar()
+            username_dropdown = ttk.Combobox(main, textvariable=username_var, font=font_style, width=20)
+            username_dropdown.grid(row=0, column=0, pady=10)
+
+            adminmode = tk.Frame(self,background=WHITE)
+            adminmode.grid(row=0, column=1,sticky=NORTHEASTWEST,padx=10)
+            create_new_employee_label = tk.Label(adminmode, text="Create New Employee", **self.Entry_style)
+            create_new_employee_label.grid(row=0, column=0, columnspan=2)
+
+            employee_namelabel = tk.Label(adminmode, text="Write new employee name:",background=WHITE)
+            employee_namelabel.grid(row=1, column=0, sticky=tk.E)
+            employee_name = tk.Entry(adminmode, **self.Entry_style)
+            employee_name.grid(row=1, column=1)
+
+            username_label = tk.Label(adminmode, text="Username:",background=WHITE)
+            username_label.grid(row=2, column=0, sticky=tk.E)
+            username = tk.Entry(adminmode, **self.Entry_style)
+            username.grid(row=2, column=1)
+
+            password1_label = tk.Label(adminmode, text="Password:",background=WHITE)
+            password1_label.grid(row=3, column=0, sticky=tk.E)
+            password1 = tk.Entry(adminmode, show="*", **self.Entry_style)
+            password1.grid(row=3, column=1)
+
+            password2_label = tk.Label(adminmode, text="Confirm Password:",background=WHITE)
+            password2_label.grid(row=4, column=0, sticky=tk.E)
+            password2 = tk.Entry(adminmode, show="*", **self.Entry_style)
+            password2.grid(row=4, column=1)
+
+            create_employee_button = tk.Button(adminmode, text="Create New Employee", **self.button_style)
+            create_employee_button.grid(row=5, column=0, columnspan=2)
+
+        change_password_label = tk.Label(main,text="Change password below", **self.Entry_style)
+        change_password_label.grid(row = 1, column = 0, pady=(0,5),sticky=NORTHEASTWEST)
+
+        password_entry = tk.Entry(main, show="*",**self.Entry_style)
+        password_entry.grid(row = 2, column = 0, pady = (10,0),sticky=NORTHEASTWEST)
+        
+        confirm_password_entry = ttk.Entry(main, show="*", **self.Entry_style )
+        confirm_password_entry.grid(row = 3, column = 0, pady = (0,10),sticky=NORTHEASTWEST)
+
+        change_password_btn = tk.Button(main, text="Change password", **self.button_style, font=font_style)
+        change_password_btn.grid(row = 4, column = 0, pady = 20,sticky=NORTHEASTWEST)
+
+        exit_btn = tk.Button(main, text="Exit app", **self.button_style, font=font_style, command=self.exit_app)
+        exit_btn.grid(row = 5, column = 0, pady = 5)
+
+    def passwords_match(self, password1, password2):
+        if password1 != password2:
+            messagebox.showerror("Error", "Passwords do not match!")
+            return False
+        return True
+
+    def create_new_employee(self, username, password1, password2):
+        self.passwords_match(password1, password2)
+        # Add code to create a new employee with the given username and password
+
+    def change_password(self, password1, password2):
+        self.passwords_match(password1, password2)
+        # Add code to change the password
+    def exit_app(self):
+        self.quit()
 if __name__ == "__main__":
     login_window = LoginWindow()
     login_window.mainloop()
