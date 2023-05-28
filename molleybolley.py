@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
 
-from queries import Data_analysis,Login_query,Update_services, Employees, ExportData
+from queries import Data_analysis,Login_query,Update_services, Employees, ExportData,Create_Entry_For_Today
 
 from tkinter import filedialog
 from tkinter import ttk
@@ -24,11 +24,20 @@ TODAY = datetime.datetime.today().date()
 WHITE = "#ffffff"
 ROYAL_BLUE ="#08147d"
 
+def center_window(window):
+    window.update_idletasks()
+    width = window.winfo_width()
+    height = window.winfo_height()
+    x = (window.winfo_screenwidth() // 2) - (width // 2)
+    y = (window.winfo_screenheight() // 2) - (height // 2)
+    window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+
 class LoginWindow(tk.Tk):
     app_title="MOLEYBOLEY"
     image_header = Image.open("images/business_logo.jpg")
     business_logo = None
     app_label = None
+    service_data_to_be_updated:dict = {}
 
     def __init__(self):
         super().__init__()
@@ -60,11 +69,8 @@ class LoginWindow(tk.Tk):
             
 
             self.customer_entry.configure(font=self.large_font, width=self.buttons_width)
-            self.services_dropdown.configure(font=self.large_font, width=self.buttons_width)
-            self.submit_button.configure(font=self.large_font, width=self.buttons_width)
             self.employees_dropdown.configure(font=self.large_font, width=self.buttons_width)
             self.assign_to_button.configure(font=self.large_font, width=self.buttons_width)
-            self.employee_entry.configure(font=self.large_font, width=self.buttons_width)
             self.mark_as_free_button.configure(font=self.large_font, width=self.buttons_width)
             self.next_in_line.configure(font=self.large_font,bg=WHITE,highlightcolor=ROYAL_BLUE,highlightthickness=2,
                                          width=self.buttons_width,height=3)
@@ -81,25 +87,19 @@ class LoginWindow(tk.Tk):
             pass
     def grid_all_buttons(self):
         self.customer_entry.grid(row=0, column=0, padx=0, pady=(0, 0), sticky=NORTHEASTWEST)
-        self.services_dropdown.grid(row=1, column=0, padx=0, pady=(0, 0), sticky=NORTHEASTWEST)
-        self.submit_button.grid(row=2, column=0, padx=0, pady=(0, 7),sticky=NORTHEASTWEST)
         self.next_info.grid(row=3, column=0, padx=0, pady=(0, 0),sticky=NORTHEASTWEST)
         self.next_in_line.grid(row=4, column=0, padx=0, pady=(10, 10),sticky=NORTHEASTWEST)
         self.employees_dropdown.grid(row=5, column=0, padx=0, pady=(10, 0),sticky=NORTHEASTWEST)
         self.assign_to_button.grid(row=6, column=0, padx=0, pady=(0, 23),sticky=NORTHEASTWEST) 
-        self.employee_entry.grid(row=7, column=0, padx=0, pady=(0, 0),sticky=NORTHEASTWEST) 
         self.mark_as_free_button.grid(row=8, column=0, padx=0, pady=(0,0),sticky=NORTHEASTWEST)
 
     def load_existing_data(self):
-        with open("data.json", "r") as file:
-            data = json.load(file)
-            self.services:list = data["services"] 
-            self.accounts:dict = data["accounts"]
+        Create_Entry_For_Today(TODAY)
         query = Employees()
         self.employees = query.get_employees()
         query = Data_analysis()
-        self.customers_served = query.get_running_total_per_day(TODAY) 
-    
+        self.customers_served:pd.DataFrame = query.get_running_total_per_day(TODAY) 
+
     def create_login_frame(self):
         self.frame = tk.Frame(self, bg=ROYAL_BLUE,padx=50,pady=15, highlightthickness=4, highlightbackground="silver",relief='ridge')
         self.frame.place(relx=0.5, rely=0.5, anchor="center")
@@ -170,10 +170,10 @@ class LoginWindow(tk.Tk):
         self.wait_list.grid(row=0, column=0, pady=0,sticky=NORTHEASTWEST)
         self.wait_list['columns'] = ("Service",)
         self.wait_list.heading("#0", text="Customer Name")
-        self.wait_list.heading("Service", text="Service")
+        self.wait_list.heading("Service", text="Services")
         self.wait_list.column("#0", width=int(self.screen_width*.75/2))
         self.wait_list.column("Service", width=int(self.screen_width*.75/2))
-        self.wait_list.bind("<Delete>", lambda event: self.delete_customer)
+        self.wait_list.bind("<Delete>", lambda event: self.delete_customer(event))
 
 
         self.wait_list_frame = tk.Frame(self.trees, borderwidth=1, relief="solid", bg=ROYAL_BLUE)
@@ -187,23 +187,15 @@ class LoginWindow(tk.Tk):
         self.employee_list.heading("Service", text="Service")
         self.employee_list.heading("Status", text="Status")
 
-        self.employee_list.column("#0", width=int(self.screen_width*.75/3))
-        self.employee_list.column("Service", width=int(self.screen_width*.75/3))
-        self.employee_list.column("Status", width=int(self.screen_width*.75/3))
-        self.employee_list.bind(LEFT_CLICK,self.on_employee_left_click)
+        self.employee_list.column("#0", width=int(self.screen_width * 0.75 / 3))
+        self.employee_list.column("Service", width=int((self.screen_width * 0.75 * 2 / 3) * 4 / 5))
+        self.employee_list.column("Status", width=int((self.screen_width * 0.75 * 2 / 3) * 1 / 5))
         self.employee_list.bind(DOUBLE_LEFT_CLICK,self.on_employee_double_click)
         self.add_initial_items_on_employee_list()
 
         self.trees.columnconfigure(0, weight=1)
         self.trees.rowconfigure(0, weight=2)
         self.trees.rowconfigure(1, weight=1)
-
-    def on_employee_left_click(self,event):
-        self.employee_entry.delete(0,tk.END)
-        self.employee_list
-        selected_item=self.employee_list.focus()
-        employee_name = self.employee_list.item(selected_item)
-        self.employee_entry.insert(0, employee_name["text"])
     
     def on_employee_double_click(self,event):
         self.load_existing_data()
@@ -223,22 +215,12 @@ class LoginWindow(tk.Tk):
         
         self.customer_entry = ttk.Entry(self.buttons_frame)
         self.customer_entry.insert(0, "Enter customer name")
-        self.customer_entry.bind("<FocusIn>", lambda event :self.clear_placeholder(event = event,isCustomer=True))
-        self.customer_entry.bind("<FocusOut>", lambda event: self.restore_placeholder(event=event,isCustomer=True))
-
-        self.services_dropdown = ttk.Combobox(self.buttons_frame, values=self.services, state="readonly",foreground=WHITE, background=ROYAL_BLUE)
-        self.submit_button = tk.Button(self.buttons_frame, text="Submit",fg=WHITE, bg=ROYAL_BLUE,
-                                       command=lambda: self.submit_button_clicked(None))
-        self.services_dropdown.bind('<Return>',self.submit_button_clicked)
+        self.customer_entry.bind("<FocusIn>", lambda event :self.clear_placeholder(event = event))
+        self.customer_entry.bind("<FocusOut>", lambda event: self.restore_placeholder(event=event))
+        self.customer_entry.bind(ENTER_KEY,lambda event: self.add_customer(event))
         
         self.next_info = tk.Label(self.buttons_frame, text="Next in Line: ")
         self.next_in_line = tk.Label(self.buttons_frame)
-
-
-        self.employee_entry = ttk.Entry(self.buttons_frame)
-        self.employee_entry.insert(0, "Add employee name here")
-        self.employee_entry.bind("<FocusIn>", lambda event :self.clear_placeholder(event = event,isCustomer=False))
-        self.employee_entry.bind("<FocusOut>", lambda event: self.restore_placeholder(event=event,isCustomer=False))
           
         self.employees_dropdown = ttk.Combobox(self.buttons_frame, values=self.free_employees, state="readonly",foreground=WHITE, background=ROYAL_BLUE)
         self.assign_to_button = tk.Button(self.buttons_frame, text="Assign-to",fg=WHITE, bg=ROYAL_BLUE,command=self.assign_customer_to_employee)
@@ -268,39 +250,19 @@ class LoginWindow(tk.Tk):
         self.update_next_in_line()
         return values
 
+    def clear_placeholder(self, event):
 
-    def add_employee(self,event,status: str = FREE,employee_name = None,mark_as_free_name = None):
-
-        if employee_name is None:
-            if mark_as_free_name is None:
-                employee_name = self.employee_entry.get()
-            else: employee_name = mark_as_free_name  
-            self.employee_list.insert(EMPTY, END, values=(EMPTY, status),text=employee_name)
-        self.employee_entry.delete(0, END)      
-        
-        with open("data.json", "r+") as file:
-            data = json.load(file)
-            data["employees"][employee_name] = status
-            file.seek(0)
-            json.dump(data, file, indent=4)
-            file.truncate()
-
-    def clear_placeholder(self, event,isCustomer):
-        if isCustomer:
-            if self.customer_entry.get() == "Enter customer name":
-                self.customer_entry.delete(0, tk.END)
+        if self.customer_entry.get() == "Enter customer name":
+            self.customer_entry.delete(0, tk.END)
             return
-        if self.employee_entry.get() == "Add employee name here":
-            self.employee_entry.delete(0,tk.END)
-            
 
-    def restore_placeholder(self, event,isCustomer):
-        if isCustomer:
-            if not self.customer_entry.get():
-                self.customer_entry.insert(0, "Enter customer name")
-            return
-        if not self.employee_entry.get():
-            self.employee_entry.insert(0,"Add employee name here")
+
+    def restore_placeholder(self, event):
+
+        if not self.customer_entry.get():
+            self.customer_entry.insert(0, "Enter customer name")
+        return
+
             
     def assign_customer_to_employee(self):
         assigned_employee = self.employees_dropdown.get()
@@ -330,17 +292,25 @@ class LoginWindow(tk.Tk):
         self.update_employee_list(employee,EMPTY,FREE)
         query = Employees()
         query.update_employee_status(employee,FREE)
-        self.restore_placeholder(None,False)
 
-    def submit_button_clicked(self,event):
+    def add_customer(self,event):
         customer_name = self.customer_entry.get()
-        selected_service = self.services_dropdown.get()
-        if customer_name ==EMPTY or selected_service==EMPTY:
+        if customer_name ==EMPTY:
             return
+        new_popup = ServicePopup(self,True,self.get_service_data_to_be_updated, customer_name)
+        
+    def get_service_data_to_be_updated(self, query_data):
+        customer_name = self.customer_entry.get()
+        self.service_data_to_be_updated:dict = query_data
+        services=[]
+        for key,value in self.service_data_to_be_updated.items():
+            if value:
+                services.append(key)
+        selected_service = ", ".join(services)
         self.wait_list.insert(EMPTY, END, values=(selected_service,), text=customer_name)
         self.customer_entry.delete(0, END)
-        self.services_dropdown.set(EMPTY)
         self.update_next_in_line()
+
     def update_free_employees(self):
         query = Employees()
         self.free_employees = query.get_free_employees()
@@ -385,6 +355,7 @@ class GraphResults(tk.Toplevel):
         self.create_bar_graph(data)
         self.create_table(actuals)
         self.create_extract_buttons()
+        center_window(self)
 
     def destroy(self):
         type(self)._instance = None
@@ -409,9 +380,11 @@ class GraphResults(tk.Toplevel):
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=False)    
 
-    def create_table(self,df:pd.DataFrame):
+    def create_table(self,data:pd.DataFrame):
         self.screen_width = self.winfo_screenwidth()
         self.screen_height = self.winfo_screenheight()
+        if data.empty:
+            data = self.create_default_for_empty_dataframe()
         if self.screen_height > 900:
             my_font = font.Font(size=12)
 
@@ -426,10 +399,10 @@ class GraphResults(tk.Toplevel):
                              ("hover", WHITE)])
         
         self.actual_table = ttk.Treeview(self,style="myCustom.Treeview")
-        self.actual_table["columns"] = df.columns.tolist()
+        self.actual_table["columns"] = data.columns.tolist()
         self.actual_table.configure(height=5)
         counter = 0
-        for column in df.columns:
+        for column in data.columns:
             column_name = column
             if counter == 4:
                 column_width = 140
@@ -441,7 +414,7 @@ class GraphResults(tk.Toplevel):
             self.actual_table.column(column, width=column_width, anchor=tk.W)
             counter +=1
 
-        for index, row in df.iterrows():
+        for index, row in data.iterrows():
             row_total = sum(row)
             self.actual_table.insert("", "end", text=f"{index} ({row_total})", values=row.tolist())
         self.actual_table.heading("#0", text="Employee Name (total)", anchor=tk.W)
@@ -527,7 +500,85 @@ class GraphResults(tk.Toplevel):
         else:
             self.attributes("-topmost", True)
 
+class ServicePopup(tk.Toplevel):
+    _instance = None
+    def __new__(cls,*args,**kwargs):
+        if not cls._instance:
+            cls._instance = cls
+            return super().__new__(cls)
+        else:
+            return cls._instance
 
+    def __init__(self, parent: tk.Tk,isCustomer:bool,get_value_from_popup,name,manicure:int=0, pedicure: int = 0,
+                 threading:int = 0,haircut: int = 0, hairtreatment:int = 0, other:int = 0):
+        super().__init__(parent)
+        self.get_value_from_popup=get_value_from_popup
+        self.attributes("-topmost", True)
+        if isCustomer:
+            self.title(f"New Customer - {name}")
+        else: self.title(f"Services completed - {name}")
+        self.geometry("450x200")
+        self.configure(background=WHITE)
+        self.manicure = manicure
+        self.pedicure  = pedicure
+        self.threading  = threading
+        self.haircut  = haircut 
+        self.hairtreatment  = hairtreatment 
+        self.other  = other
+        self.setup_frame()
+        center_window(self)
+
+    def destroy(self):
+        type(self)._instance = None
+        super().destroy()
+    
+    def setup_frame(self):
+        frame = tk.Frame(self)
+        frame.pack()
+
+        attributes = ["Manicure", "Pedicure", "Threading", "Haircut", "HairTreatment", "Other"]
+        checkboxes = []
+
+        # Create checkboxes for attributes
+        for i, attribute in enumerate(attributes):
+            checkbox = tk.Checkbutton(frame, text=attribute, command=lambda attr=attribute: self.update_attribute(attr))
+            checkboxes.append(checkbox)
+
+            # Determine grid position based on row and column
+            row = i // 3
+            col = i % 3
+
+            checkbox.grid(row=row, column=col, padx=10, pady=5)
+
+        # Set the checkbox values based on the initial attribute values
+        checkboxes[0].select() if self.manicure == 1 else checkboxes[0].deselect()
+        checkboxes[1].select() if self.pedicure == 1 else checkboxes[1].deselect()
+        checkboxes[2].select() if self.threading == 1 else checkboxes[2].deselect()
+        checkboxes[3].select() if self.haircut == 1 else checkboxes[3].deselect()
+        checkboxes[4].select() if self.hairtreatment == 1 else checkboxes[4].deselect()
+        checkboxes[5].select() if self.other == 1 else checkboxes[5].deselect()
+
+        # Create the Submit button
+        submit_button = tk.Button(self, text="Submit", command=self.on_submit, bg="#08147d", fg="white")
+        submit_button.pack(pady=10)
+
+    def update_attribute(self, attribute):
+        checkbox_value = 1 if getattr(self, attribute.lower()) == 0 else 0
+        setattr(self, attribute.lower(), checkbox_value)
+
+    def on_submit(self):
+        # Create a dictionary to store the checkbox values
+        self.checkbox_values = {
+            "manicure": self.manicure,
+            "pedicure": self.pedicure,
+            "threading": self.threading,
+            "haircut": self.haircut,
+            "hairtreatment": self.hairtreatment,
+            "other": self.other
+        }
+        if sum(self.checkbox_values.values()):
+            self.get_value_from_popup(self.checkbox_values)
+        self.destroy()
 
 if __name__ == "__main__":
     login_window = LoginWindow()
