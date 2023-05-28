@@ -145,14 +145,21 @@ class LoginWindow(tk.Tk):
     def create_header_on_main_frame(self):
         self.main_frame = tk.Frame(self, bg=WHITE)
         self.main_frame.pack(fill="both", expand=True, padx=10, pady=10)
-         
+
+        self.image_header = Image.open("images/business_logo.jpg")   
+        max_height = int(self.screen_height * 0.25)
+        width, height = self.image_header.size
+        aspect_ratio = width / height
+        resized_height = min(height, max_height)
+        resized_width = int(resized_height * aspect_ratio)
+        self.image_header = self.image_header.resize((resized_width, resized_height), Image.ANTIALIAS)
+        self.business_logo =ImageTk.PhotoImage(self.image_header)
 
         header = tk.Frame(self.main_frame,bg=WHITE)
         header.grid(row=0, column=0, sticky="n")
         self.main_frame.grid_columnconfigure(0, weight=1)
 
-        self.image_header = Image.open("images/business_logo.jpg")   
-        self.business_logo =ImageTk.PhotoImage(self.image_header)
+
         app_label = tk.Label(header, image=self.business_logo)
         app_label.grid(row=0, column=0, padx=10, pady=0)
         app_label.bind(LEFT_CLICK, self.show_admin_panel)
