@@ -97,7 +97,7 @@ def Create_Entry_For_Today(date):
         other = 0
         employee_query = Employees()
         employee_names = employee_query.get_all_employees()
-        
+
         for employee_name in employee_names:
             cursor.execute("""
                 INSERT INTO daily_services (employee_name, date, manicure, pedicure, threading, haircut, hairtreatment, other)
@@ -110,30 +110,33 @@ class Update_services:
     def __init__(self):
         self.database_path = DATABASE_PATH
 
-    def update_manicure(self, service_id):
-        return self._update_column(service_id, 'manicure')
+    def update_manicure(self, employee_name, date):
+        return self._update_column(employee_name, date, 'manicure')
 
-    def update_pedicure(self, service_id):
-        return self._update_column(service_id, 'pedicure')
+    def update_pedicure(self, employee_name, date):
+        return self._update_column(employee_name, date, 'pedicure')
 
-    def update_threading(self, service_id):
-        return self._update_column(service_id, 'threading')
+    def update_threading(self, employee_name, date):
+        return self._update_column(employee_name, date, 'threading')
 
-    def update_haircut(self, service_id):
-        return self._update_column(service_id, 'haircut')
+    def update_haircut(self, employee_name, date):
+        return self._update_column(employee_name, date, 'haircut')
 
-    def update_hairtreatment(self, service_id):
-        return self._update_column(service_id, 'hairtreatment')
+    def update_hairtreatment(self, employee_name, date):
+        return self._update_column(employee_name, date, 'hairtreatment')
 
-    def update_other(self, service_id):
-        return self._update_column(service_id, 'other')
+    def update_other(self, employee_name, date):
+        return self._update_column(employee_name, date, 'other')
+    
+    def update(self, employee_name, date, column_name):
+        return self._update_column(employee_name,date,column_name)
 
-    def _update_column(self, service_id, column_name):
+    def _update_column(self, employee_name, date, column_name):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
-            update_query = f"UPDATE daily_services SET {column_name} = {column_name} + 1 WHERE id = ?"
+            update_query = f"UPDATE daily_services SET {column_name} = {column_name} + 1 WHERE employee_name = ? AND date = ?"
             try:
-                cursor.execute(update_query, (service_id,))
+                cursor.execute(update_query, (employee_name,date))
                 db.commit()
                 return True
             except Exception as e:
@@ -249,7 +252,6 @@ class ExportData:
                 query_params = (end_date,)
             else:
                 query_params = ()
-
             try:
                 df = pd.read_sql_query(select_query, db, params=query_params)
                 df.to_excel(output_file, index=False)
