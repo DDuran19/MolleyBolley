@@ -79,6 +79,33 @@ class Login_query:
                 print(e)
                 return []
 
+def Create_Entry_For_Today(date):
+    database_path = DATABASE_PATH
+    with sqlite3.connect(database_path) as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT date FROM daily_services WHERE date = ?", (date,))
+        existing_date = cursor.fetchone()
+
+        if existing_date:
+            return
+        manicure = 0
+        pedicure = 0
+        threading = 0
+        haircut = 0
+        hairtreatment = 0
+        other = 0
+        employee_query = Employees()
+        employee_names = employee_query.get_all_employees()
+        
+        for employee_name in employee_names:
+            cursor.execute("""
+                INSERT INTO daily_services (employee_name, date, manicure, pedicure, threading, haircut, hairtreatment, other)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (employee_name, date, manicure, pedicure, threading, haircut, hairtreatment, other))
+        db.commit()
+
+
 class Update_services:
     def __init__(self):
         self.database_path = DATABASE_PATH
@@ -182,12 +209,12 @@ class Data_analysis:
                 rows = cursor.fetchall()
                 running_service_total = {}
                 for row in rows:
-                    manicure = row[0]
-                    pedicure = row[1]
-                    threading = row[2]
-                    haircut = row[3]
-                    hairtreatment = row[4]
-                    other = row[5]
+                    manicure = 0 if row[0] is None else row[0]
+                    pedicure = 0 if row[1] is None else row[1]
+                    threading = 0 if row[2] is None else row[2]
+                    haircut = 0 if row[3] is None else row[3]
+                    hairtreatment = 0 if row[4] is None else row[4]
+                    other = 0 if row[5] is None else row[5]
                     running_service_total[date] = {
                         "Manicure": manicure,
                         "Pedicure": pedicure,
@@ -250,6 +277,18 @@ class Employees:
             except Exception as e:
                 print("Error retrieving employees:", e)
                 return {}
+    def get_all_employees(self):
+        with sqlite3.connect(self.database_path) as db:
+            cursor = db.cursor()
+            select_query = 'SELECT employee_name FROM employees'
+            try:
+                cursor.execute(select_query)
+                rows = cursor.fetchall()
+                employees = [row[0] for row in rows]
+                return employees
+            except Exception as e:
+                print("Error retrieving all employees:", e)
+                return []
 
 
     def add_employee(self, employee_name):
