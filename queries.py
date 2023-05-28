@@ -2,6 +2,7 @@ import sqlite3
 import bcrypt
 import pandas as pd
 
+from tkinter import messagebox
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -19,7 +20,8 @@ class Login_query:
             if not row:
                 return None
             hashed_password = row[2]
-            return self.check_password(password, hashed_password)
+            role = row[3]
+            return (self.check_password(password, hashed_password),role)
 
     def encrypt_pw(self,pw:str):
         key=b'$2b$12$w./mmhOqxj0PLd8gxrTpfe'
@@ -30,28 +32,41 @@ class Login_query:
         hashed=self.encrypt_pw(password_bytes)
         return hashed == hashed_password
     
-    def change_password(self,username,new_password:str):
+    def change_password(self, username, new_password: str, isAdmin=None):
         with sqlite3.connect(self.DATABASE_PATH) as db:
             cursor = db.cursor()
-            update_password = 'UPDATE user_accounts SET password = ? WHERE username = ?'
             new_password_bytes = new_password.encode("utf-8")
-            hashed=self.encrypt_pw(new_password_bytes)
+            hashed = self.encrypt_pw(new_password_bytes)
+
+            if isAdmin is None:
+                update_password = 'UPDATE user_accounts SET password = ? WHERE username = ?'
+                parameters = (hashed, username)
+            else:
+                update_password = 'UPDATE user_accounts SET password = ?, isAdmin = ? WHERE username = ?'
+                parameters = (hashed, isAdmin, username)
+
             try:
-                cursor.execute(update_password,(hashed,username))
-            except Exception as e:
-                print(e)
-    
-    def add_user(self, username:str, password:str):
-        with sqlite3.connect(self.DATABASE_PATH) as db:
-            cursor = db.cursor()
-            insert_user = 'INSERT INTO user_accounts (username, password) VALUES (?, ?)'
-            try:
-                hashed_password = bcrypt.hashpw(password.encode('utf-8'), b'$2b$12$w./mmhOqxj0PLd8gxrTpfe')
-                cursor.execute(insert_user, (username, hashed_password))
-                db.commit()
+                cursor.execute(update_password, parameters)
+                messagebox.showinfo("Success!", f"Password was changed successfully for {username}")
                 return True
             except Exception as e:
-                print(e)
+                messagebox.showerror("Error in changing password", e)
+                return False
+
+
+
+    def add_user(self, username:str, password:str, role:int):
+        with sqlite3.connect(self.DATABASE_PATH) as db:
+            cursor = db.cursor()
+            insert_user = 'INSERT INTO user_accounts (username, password, isAdmin) VALUES (?, ?, ?)'
+            try:
+                hashed_password = bcrypt.hashpw(password.encode('utf-8'), b'$2b$12$w./mmhOqxj0PLd8gxrTpfe')
+                cursor.execute(insert_user, (username, hashed_password, role))
+                db.commit()
+                messagebox.showinfo("Success!",f'{username} added successfully!')
+                return True
+            except Exception as e:
+                messagebox.showerror("Error in adding user",e)
                 return False
     
     def delete_user(self, username):
@@ -61,9 +76,10 @@ class Login_query:
             try:
                 cursor.execute(delete_user, (username,))
                 db.commit()
+                messagebox.showinfo("Success!",f'{username} deleted successfully!')
                 return True
             except Exception as e:
-                print(e)
+                messagebox.showerror("Error in deleting user",e)
                 return False
     
     def get_all_username(self):
@@ -76,7 +92,7 @@ class Login_query:
                 usernames = [row[0] for row in rows]
                 return usernames
             except Exception as e:
-                print(e)
+                messagebox.showerror("Error in getting usernames",e)
                 return []
 
 def Create_Entry_For_Today(date):
@@ -291,8 +307,6 @@ class Employees:
             except Exception as e:
                 print("Error retrieving all employees:", e)
                 return []
-
-
     def add_employee(self, employee_name):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
@@ -304,7 +318,6 @@ class Employees:
             except Exception as e:
                 db.rollback()
                 print("Error adding employee:", e)
-
     def delete_employee(self, employee_id):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
@@ -316,7 +329,6 @@ class Employees:
             except Exception as e:
                 db.rollback()
                 print("Error deleting employee:", e)
-
     def update_employee(self, employee_id, new_name, is_free):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
@@ -328,7 +340,6 @@ class Employees:
             except Exception as e:
                 db.rollback()
                 print("Error updating employee:", e)
-
     def update_employee_status(self, employee_name, is_free="Busy", service = ""):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
@@ -340,7 +351,6 @@ class Employees:
             except Exception as e:
                 db.rollback()
                 print("Error updating employee status:", e)
-
     def get_free_employees(self):
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
@@ -355,6 +365,8 @@ class Employees:
             except Exception as e:
                 print("Error retrieving free employees:", e)
                 return []
+
+
 
 if __name__ == "__main__":
     # p = 'password'
