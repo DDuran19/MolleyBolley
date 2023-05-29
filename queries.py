@@ -9,9 +9,42 @@ from datetime import datetime, timedelta
 DATABASE_PATH: str = "data.db"
 @dataclass
 class Login_query:
-    DATABASE_PATH: str = DATABASE_PATH
+    """
+The Login_query class provides methods for logging in users, changing passwords, adding users, deleting users, and getting all usernames.
 
-    def login(self, username: str, password: str):
+Intended use:
+
+The Login_query class is intended to be used by molleybolley.py where there's a need to authenticate users.
+
+General description:
+
+The Login_query class provides the following methods:
+
+login(username, password): Logs in the user with the specified username and password.
+change_password(username, new_password, isAdmin=None): Changes the password for the user with the specified username. If isAdmin is not None, the user will be granted administrator privileges if the password is changed successfully.
+add_user(username, password, role): Adds a new user with the specified username, password, and role.
+delete_user(username): Deletes the user with the specified username.
+get_all_usernames(isAdmin=3): Gets a list of all usernames, where users with a role less than isAdmin are included.
+Parameters:
+
+username: The username of the user to log in, change the password for, add, or delete.
+password: The password of the user to log in or change the password for.
+new_password: The new password for the user to change.
+isAdmin: The role of the user to add or delete. If isAdmin is not None, the user will be granted administrator privileges if the user is added or deleted successfully.
+Returns:
+
+login(): Returns a tuple of (True, role) if the user was logged in successfully, or (False, None) if the user was not logged in successfully.
+change_password(): Returns True if the password was changed successfully, or False if the password was not changed successfully.
+add_user(): Returns True if the user was added successfully, or False if the user was not added successfully.
+delete_user(): Returns True if the user was deleted successfully, or False if the user was not deleted successfully.
+get_all_usernames(): Returns a list of all usernames based on indicated role. 
+    """
+    DATABASE_PATH: str = DATABASE_PATH
+        
+    def login(self, username: str, password: str) -> tuple:
+        """
+        Returns a tuple of (True, role) if the user was logged in successfully, or (False, None) if the user was not logged in successfully.
+        """
         with sqlite3.connect(self.DATABASE_PATH) as db:
             cursor = db.cursor()
             search_username = 'SELECT * FROM user_accounts WHERE username = ?'
@@ -21,26 +54,29 @@ class Login_query:
                 messagebox.showerror("Login", "Invalid username or password!")
                 return None            
             hashed_password = row[2]
-            if not self.check_password(password, hashed_password):
+            if not self._check_password(password, hashed_password):
                 messagebox.showerror("Login", "Invalid username or password!")
                 return None
             role = row[3]
             return (True,role)
 
-    def encrypt_pw(self,pw:str):
+    def _encrypt_pw(self,pw:str):
         key=b'$2b$12$w./mmhOqxj0PLd8gxrTpfe'
         return bcrypt.hashpw(pw,key)
     
-    def check_password(self, password: str, hashed_password: bytes):
+    def _check_password(self, password: str, hashed_password: bytes):
         password_bytes = password.encode('utf-8')
-        hashed=self.encrypt_pw(password_bytes)
+        hashed=self._encrypt_pw(password_bytes)
         return hashed == hashed_password
     
-    def change_password(self, username, new_password: str, isAdmin=None):
+    def change_password(self, username, new_password: str, isAdmin=None) -> bool:
+        """
+        Returns True if the password was changed successfully, or False if the password was not changed successfully
+        """
         with sqlite3.connect(self.DATABASE_PATH) as db:
             cursor = db.cursor()
             new_password_bytes = new_password.encode("utf-8")
-            hashed = self.encrypt_pw(new_password_bytes)
+            hashed = self._encrypt_pw(new_password_bytes)
 
             if isAdmin is None:
                 update_password = 'UPDATE user_accounts SET password = ? WHERE username = ?'
@@ -57,9 +93,10 @@ class Login_query:
                 messagebox.showerror("Error in changing password", e)
                 return False
 
-
-
-    def add_user(self, username:str, password:str, role:int):
+    def add_user(self, username:str, password:str, role:int)-> bool:
+        """
+        Returns True if the user was added successfully, or False if the user was not added successfully.
+        """
         with sqlite3.connect(self.DATABASE_PATH) as db:
             cursor = db.cursor()
             insert_user = 'INSERT INTO user_accounts (username, password, isAdmin) VALUES (?, ?, ?)'
@@ -73,7 +110,10 @@ class Login_query:
                 messagebox.showerror("Error in adding user",e)
                 return False
     
-    def delete_user(self, username):
+    def delete_user(self, username) -> bool:
+        """
+        Returns True if the user was deleted successfully, or False if the user was not deleted successfully.
+        """
         with sqlite3.connect(self.DATABASE_PATH) as db:
             cursor = db.cursor()
             delete_user = 'DELETE FROM user_accounts WHERE username = ?'
@@ -86,7 +126,10 @@ class Login_query:
                 messagebox.showerror("Error in deleting user",e)
                 return False
     
-    def get_all_username(self, isAdmin = 3):
+    def get_all_username(self, isAdmin = 3) ->list:
+        """
+        Returns a list of all usernames based on indicated role. 
+        """
         with sqlite3.connect(self.DATABASE_PATH) as db:
             cursor = db.cursor()
             select_all_usernames = f'SELECT username FROM user_accounts WHERE isAdmin < {isAdmin}'
@@ -375,36 +418,4 @@ class Employees:
 
 
 if __name__ == "__main__":
-    # p = 'password'
-    # a = Login_query()
-    # b= a.login('admin',p)
-    # print(b)
-
-    # key=b'$2b$12$w./mmhOqxj0PLd8gxrTpfe'
-    # password_bytes = p.encode('utf-8')
-    # hashed=bcrypt.hashpw(password_bytes,key)
-    # print(hashed)
-    # c = bcrypt.checkpw(hashed,b'$2b$12$w./mmhOqxj0PLd8gxrTpfegw6G/wHR30ReEU1pIuF1fpFOF4zwtoq')
-    # d = hashed == b'$2b$12$w./mmhOqxj0PLd8gxrTpfegw6G/wHR30ReEU1pIuF1fpFOF4zwtoq'
-    # print (c)
-    # print (d)
-
-    # e = b'$2b$12$w./mmhOqxj0PLd8gxrTpfegw6G/wHR30ReEU1pIuF1fpFOF4zwtoq'.decode()
-    # print(e)
-    # u = 'superuser'
-    # f = a.change_password(u,"Denver")
-    # a.change_password('admin',p)
-    # print(f)
-    # g = a.login(u,'Denver')
-    # print(g)
-    # h = a.login('admin',p)
-    # print(h)
-    # i = a.change_password('megauser',"Password")
-    # print(a.login('megauser',"Password"))
-    # j = a.add_user("Denver","Denver")
-    # k=a.login('Denver','Denver')
-    # print(k)
-    l = Data_analysis()
-    m = l.get_total_services_per_day(datetime.today().date())
-    print(m)
-    print(datetime.today().date())
+    pass
