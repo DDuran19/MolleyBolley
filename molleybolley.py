@@ -25,6 +25,15 @@ ROYAL_BLUE ="#08147d"
 READONLY = "readonly"
 
 def center_window(window):
+    """
+    center_window() centers the given window on the screen.
+
+    Args:
+        window: The window to be centered.
+
+    Returns:
+        None.
+    """
     window.update_idletasks()
     width = window.winfo_width()
     height = window.winfo_height()
@@ -33,12 +42,52 @@ def center_window(window):
     window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
 def toggle_topmost(window):
+    """
+    toggle_topmost() toggles the topmost property of the given window.
+       topmost means it will always be visible on top of other apps
+
+    Args:
+        window: The window whose topmost property is to be toggled.
+
+    Returns:
+        None.
+    """
     if window.attributes("-topmost"):
         window.attributes("-topmost", False)
     else:
         window.attributes("-topmost", True)
 
 class LoginWindow(tk.Tk):
+    """
+    LoginWindow() is a class that represents a login window.
+
+    Intended Use:
+        To create an Graphic User Interface for viewing the login part and as well as the main workarea comprising of the two tables, customers in queue and employees
+
+    Attributes:
+        app_title: The title of the login window.
+        image_header: used to store the image so it wont be garbage collected
+        business_logo: used to store the image so it wont be garbage collected
+        app_label: used to store the image so it wont be garbage collected
+        service_data_to_be_updated: The service data to be updated.
+        isAdmin: The isAdmin flag of the login window.
+
+    Methods:
+        __init__(): The constructor of the LoginWindow class.
+        on_window_resize(): The method that is called when the login window is resized.
+        grid_all_buttons(): The method that grids all the buttons of the login window.
+        load_existing_data(): The method that loads the existing data into the login window.
+        create_login_frame(): The method that creates the login frame of the login window.
+        create_main_frame(): The method that creates the main frame of the login window.
+        create_header_on_main_frame(): The method that creates the header on the main frame of the login window.
+        show_admin_panel(): The method that shows the admin panel.
+        create_two_sub_frames(): The method that creates the two sub frames of the main frame.
+        create_ttk_trees(): The method that creates the ttk trees of the main frame.
+        create_buttons_frame(): The method that creates the buttons frame of the main frame.
+        on_employee_double_click(): The method that is called when an employee is double clicked in the employee tree.
+        add_initial_items_on_employee_list(): The method that adds initial items to the employee tree.
+        create_buttons_frame(): The method that creates the buttons frame of the main frame.
+    """
     app_title="MOLEYBOLEY"
     image_header = Image.open("images/business_logo.jpg")
     business_logo = None
@@ -390,7 +439,37 @@ class LoginWindow(tk.Tk):
             
 
 class GraphResults(tk.Toplevel):
+    """
+    This class creates a window that displays a bar graph and a table of data.
+
+    The data can be passed to the constructor as a Pandas DataFrame.
+
+    The window has four buttons:
+
+    * Extract Running Today: Extracts the data for the current day and saves it to an Excel file.
+    * Extract Last 7 Days: Extracts the data for the last 7 days and saves it to an Excel file.
+    * Extract Last 30 Days: Extracts the data for the last 30 days and saves it to an Excel file.
+    * Extract All: Extracts all of the data and saves it to an Excel file.
     
+    Intended use:
+
+    The GraphResults class can be used to display a bar graph and a table of data. The data can be passed to the constructor as a Pandas DataFrame. The window has four buttons that allow the user to extract the data for the current day, the last 7 days, the last 30 days, or all of the data. The extracted data is saved to an Excel file.
+
+    General description
+
+    The GraphResults class inherits from the tk.Toplevel class. It has four methods:
+
+    __init__(): This method initializes the window and creates the bar graph and the table of data.
+    create_bar_graph(): This method creates the bar graph.
+    create_table(): This method creates the table of data.
+    create_extract_buttons(): This method creates the four buttons.
+    The GraphResults class also has four helper methods:
+
+    extract_running(): This method extracts the data for the current day and saves it to an Excel file.
+    extract_last_seven_days(): This method extracts the data for the last 7 days and saves it to an Excel file.
+    extract_last_thirty_days(): This method extracts the data for the last 30 days and saves it to an Excel file.
+    extract_all(): This method extracts all of the data and saves it to an Excel file.
+    """
     _instance = None
     def __new__(cls,*args,**kwargs):
         if not cls._instance:
