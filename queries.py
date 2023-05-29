@@ -386,6 +386,37 @@ class Data_analysis:
                 return {}
 
 class ExportData:
+    """
+    This class provides methods for exporting data from the database to an Excel file.
+
+    Intended use:
+
+    The `ExportData` class can be used to export the following data:
+
+    * All data from the `daily_services` table
+    * Data from the `daily_services` table between two dates
+    * Data from the `daily_services` table on a given date
+
+    General description:
+
+    The `ExportData` class provides the following methods for exporting data:
+
+    * `export_to_excel()`: Exports all data from the `daily_services` table to an Excel file.
+    * `export_to_excel_between_dates()`: Exports data from the `daily_services` table between two dates to an Excel file.
+    * `export_to_excel_on_date()`: Exports data from the `daily_services` table on a given date to an Excel file.
+
+    To use the `ExportData` class, first create an instance of the class. Then, call the appropriate method to export the data you want. For example, to export all data from the `daily_services` table to an Excel file, you would call the following method:
+
+
+    export_data.export_to_excel("output_file.xlsx")
+
+
+    The `ExportData` class will return a tuple containing the following values:
+
+    * `True`: If the export was successful
+    * `False`: If the export was not successful
+    * `Error message`: If the export was not successful, this value will contain an error message
+    """
     def __init__(self):
         self.database_path = DATABASE_PATH
 
@@ -412,10 +443,50 @@ class ExportData:
                 return (False,str(e))
 
 class Employees:
+    """
+    Employees
+
+    This class provides methods for managing employees in a database.
+
+    Intended use:
+
+    The `Employees` class can be used to:
+
+    * Get all employees
+    * Get a specific employee
+    * Add a new employee
+    * Delete an employee
+    * Update an employee's information
+    * Update an employee's status
+
+    General description
+
+    The `Employees` class provides the following methods for managing employees:
+
+    * `get_employees()`: Gets all employees from the database.
+    * `get_employee()`: Gets a specific employee from the database by their name.
+    * `add_employee()`: Adds a new employee to the database.
+    * `delete_employee()`: Deletes an employee from the database by their name.
+    * `update_employee()`: Updates an employee's information in the database.
+    * `update_employee_status()`: Updates an employee's status in the database.
+    * `get_free_employees()`: Gets all employees from the database with "Free" status.
+
+    To use the `Employees` class, first create an instance of the class. Then, call the appropriate method to manage the employees you want. For example, to get all employees, you would call the following method:
+
+
+    employees = Employees()
+    employees.get_employees()
+
+
+    The `Employees` class will return a list of employees.
+    """
     def __init__(self):
         self.database_path = DATABASE_PATH
 
     def get_employees(self):
+        """
+        * `get_employees()`: Gets all employees from the database.
+        """
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
             select_query = 'SELECT employee_name,service, isFree FROM employees'
@@ -431,6 +502,9 @@ class Employees:
                 print("Error retrieving employees:", e)
                 return {}
     def get_all_employees(self):
+        """
+         * `get_employee()`: Gets a specific employee from the database by their name.
+        """
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
             select_query = 'SELECT employee_name FROM employees'
@@ -443,6 +517,9 @@ class Employees:
                 print("Error retrieving all employees:", e)
                 return []
     def add_employee(self, employee_name, username):
+        """
+        * `add_employee()`: Adds a new employee to the database.
+        """
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
             insert_query = 'INSERT INTO employees (employee_name, isFree, username) VALUES (?, ?, ?)'
@@ -453,8 +530,10 @@ class Employees:
             except Exception as e:
                 db.rollback()
                 print("Error adding employee:", e)
-
     def delete_employee(self, username):
+        """
+        * `delete_employee()`: Deletes an employee from the database by their name.
+        """
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
             delete_query = 'DELETE FROM employees WHERE username = ?'
@@ -466,6 +545,9 @@ class Employees:
                 db.rollback()
                 messagebox.showinfo("Error deleting employee", e)
     def update_employee(self, employee_id, new_name, is_free):
+        """
+        * `update_employee()`: Updates an employee's information in the database.
+        """
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
             update_query = 'UPDATE employees SET employee_name = ?, isFree = ? WHERE id = ?'
@@ -477,6 +559,9 @@ class Employees:
                 db.rollback()
                 print("Error updating employee:", e)
     def update_employee_status(self, employee_name, is_free="Busy", service = ""):
+        """
+        * `update_employee_status()`: Updates an employee's status in the database.
+        """
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
             update_query = 'UPDATE employees SET isFree = ?, service = ? WHERE employee_name = ?'
@@ -488,6 +573,9 @@ class Employees:
                 db.rollback()
                 print("Error updating employee status:", e)
     def get_free_employees(self):
+        """
+        * `get_free_employees()`: Gets all employees from the database with "Free" status.
+        """
         with sqlite3.connect(self.database_path) as db:
             cursor = db.cursor()
             select_query = 'SELECT employee_name FROM employees WHERE isFree = "Free"'
