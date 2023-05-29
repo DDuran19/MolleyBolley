@@ -144,6 +144,37 @@ get_all_usernames(): Returns a list of all usernames based on indicated role.
                 return []
 
 def Create_Entry_For_Today(date):
+    """
+    The `Create_Entry_For_Today` function creates a new entry in the `daily_services` table for the current day.
+
+    **Intended use:**
+
+    TO ensure that there are data present in the database daily, Also to avoid errors on the graph for current running data
+
+    **General description:**
+
+    The `Create_Entry_For_Today` function does the following:
+
+    1. Checks if an entry already exists for the current day.
+    2. If an entry does not exist, it creates a new entry with the following values:
+        * `employee_name`: The name of the employee who provided the service.
+        * `date`: The date of the service.
+        * `manicure`: The number of manicures provided.
+        * `pedicure`: The number of pedicures provided.
+        * `threading`: The number of threadings provided.
+        * `haircut`: The number of haircuts provided.
+        * `hairtreatment`: The number of hair treatments provided.
+        * `other`: The number of other services provided.
+    3. Commits the changes to the database.
+
+    **Parameters:**
+
+    * `date`: The date of the service.
+
+    **Returns:**
+
+    None.
+    """
     database_path = DATABASE_PATH
     with sqlite3.connect(database_path) as db:
         cursor = db.cursor()
@@ -168,7 +199,6 @@ def Create_Entry_For_Today(date):
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (employee_name, date, manicure, pedicure, threading, haircut, hairtreatment, other))
         db.commit()
-
 
 class Update_services:
     def __init__(self):
