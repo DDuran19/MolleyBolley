@@ -625,6 +625,28 @@ class GraphResults(tk.Toplevel):
         
 
 class ServicePopup(tk.Toplevel):
+    """
+    This class creates a window that allows a user to select service requested by customer or done by an employee.
+
+    The window has the following widgets:
+
+    A checkbox for each service.
+    A button to submit the selected services.
+
+    Intended use:
+
+    The ServicePopup class can be used by users to select services. The window allows users to select one or more services and then submit the selected services.
+
+    General description:
+
+    The ServicePopup class inherits from the tk.Toplevel class. It has the following methods:
+
+    __init__(): This method initializes the window and creates the widgets.
+    setup_frame(): This method creates the frame that contains the checkboxes.
+    update_attribute(): This method updates the value of the attribute corresponding to the selected checkbox.
+    on_submit(): This method submits the selected services.
+
+    """
     _instance = None
     def __new__(cls,*args,**kwargs):
         if not cls._instance:
@@ -687,7 +709,6 @@ class ServicePopup(tk.Toplevel):
         submit_button = tk.Button(self, text="Submit", command=self.on_submit, bg="#08147d", fg="white", height=2, width=20)
         submit_button.pack(pady=10)
 
-
     def update_attribute(self, attribute):
         checkbox_value = 1 if getattr(self, attribute.lower()) == 0 else 0
         setattr(self, attribute.lower(), checkbox_value)
@@ -712,6 +733,7 @@ class ServicePopup(tk.Toplevel):
                     query.update(self.name,TODAY,service_name)
             self.get_value_from_popup()
         self.destroy()
+
 
 class AdminPanel(tk.Toplevel):
     """
@@ -939,9 +961,3 @@ class AdminPanel(tk.Toplevel):
 if __name__ == "__main__":
     login_window = LoginWindow()
     login_window.mainloop()
-    # data = pd.DataFrame({'Category': ['A', 'B', 'C', 'D'],
-    #                  'Value': [10, 20, 15, 25]})
-
-    # root = tk.Tk()
-    # graph_results = GraphResults(root, data)
-    # root.mainloop()
