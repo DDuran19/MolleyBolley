@@ -147,11 +147,11 @@ def Create_Entry_For_Today(date):
     """
     The `Create_Entry_For_Today` function creates a new entry in the `daily_services` table for the current day.
 
-    **Intended use:**
+    Intended use:
 
     TO ensure that there are data present in the database daily, Also to avoid errors on the graph for current running data
 
-    **General description:**
+    General description:
 
     The `Create_Entry_For_Today` function does the following:
 
@@ -167,11 +167,11 @@ def Create_Entry_For_Today(date):
         * `other`: The number of other services provided.
     3. Commits the changes to the database.
 
-    **Parameters:**
+    Parameters:
 
     * `date`: The date of the service.
 
-    **Returns:**
+    Returns:
 
     None.
     """
@@ -201,6 +201,36 @@ def Create_Entry_For_Today(date):
         db.commit()
 
 class Update_services:
+    """
+    This class provides methods for updating the services provided by employees in a database.
+
+    Intended use:
+
+    The Update_services class can be used to update the following services:
+
+    Manicure
+    Pedicure
+    Threading
+    Haircut
+    Hair treatment
+    Other
+    General description
+
+    The Update_services class provides the following methods for updating services:
+
+    update_manicure(): Updates the number of manicures provided by an employee on a given date.
+    update_pedicure(): Updates the number of pedicures provided by an employee on a given date.
+    update_threading(): Updates the number of threadings provided by an employee on a given date.
+    update_haircut(): Updates the number of haircuts provided by an employee on a given date.
+    update_hairtreatment(): Updates the number of hair treatments provided by an employee on a given date.
+    update_other(): Updates the number of other services provided by an employee on a given date.
+    To use the Update_services class, first create an instance of the class. Then, call the appropriate method to update the service you want to update. For example, to update the number of manicures provided by an employee named "John Smith" on the date "2023-05-29", you would call the following method:
+
+    update_services.update_manicure("John Smith", "2023-05-29")
+
+    The Update_services class will update the database and return True if the update was successful. If the update was not successful, the class will return False.
+    """
+
     def __init__(self):
         self.database_path = DATABASE_PATH
 
@@ -238,6 +268,33 @@ class Update_services:
                 return False
 
 class Data_analysis:
+    """
+    This class provides methods for analyzing data in a database.
+
+    Intended use:
+
+    The `Data_analysis` class can be used to analyze the following data:
+
+    * Total services provided per day
+    * Total services provided per week
+    * Running total of services provided per day
+
+    General description
+
+    The `Data_analysis` class provides the following methods for analyzing data:
+
+    * `get_total_services_per_day()`: Gets the total number of services provided on a given day.
+    * `get_total_services_per_week()`: Gets the total number of services provided on the last 7 days.
+    * `get_running_total_per_day()`: Gets the running total of services on this day.
+
+    To use the `Data_analysis` class, first create an instance of the class. Then, call the appropriate method to get the data you want. For example, to get the total number of services provided on the date "2023-05-29", you would call the following method:
+
+
+    data_analysis.get_total_services_per_day("2023-05-29")
+
+
+    The `Data_analysis` class will return a DataFrame containing the data you requested.
+    """
     def __init__(self):
         self.database_path = DATABASE_PATH
 
