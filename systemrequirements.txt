@@ -1,0 +1,51 @@
+1.1 Product scope:
+
+Benefits: This software, the product, should provide an efficient and streamlined workflow for managing customer queues and employee assignments, resulting in improved customer service.
+Objectives: The objective of the product is to enhance the efficiency of managing customer queues, employee assignments, and service records.
+Goals: The goals of the product include increasing customer satisfaction, optimizing employee productivity, and improving overall operational effectiveness.
+
+1.2 Product value:
+The audience will find value in the product through its ability to:
+
+Simplify and automate the process of managing customer queues.
+Enhance employee productivity and enable efficient service assignments.
+Provide real-time insights and data analysis for effective decision-making.
+Improve customer satisfaction and experience.
+
+1.3 Intended audience:
+The product is intended to serve MolleyBolley Hair Salon to manage customer queues and employee assignments effectively.
+
+1.4 Intended use:
+The intended audience will use this product to:
+
+Add customers to a queue, assign them to employees, and track the services provided.
+Monitor and manage the status and progress of customer service.
+Analyze sales data and extract information for decision-making.
+
+1.5 General description:
+The software performs the following functions and includes the following features:
+
+Manages customer queues and tracks employee assignments.
+Provides a user-friendly interface for adding customers and selecting services.
+Displays real-time updates on customer status and employee availability.
+Allows for data analysis of sales information and customer service metrics.
+
+Design requirements:
+
+The software should have an intuitive and user-friendly interface.
+It should provide a responsive and efficient queue management system.
+The design should allow for easy customization and scalability.
+
+Graphics requirements:
+
+The software may include graphical elements such as pictures, buttons, and visual representations of data.
+The graphics should be clear, visually appealing, and consistent with the overall design.
+
+Operating system requirements:
+
+The software should be compatible with windows.
+
+Constraints:
+
+The product should adhere to any specific regulations or industry standards applicable to the intended audience.
+The software should be developed within the available resources, considering time, budget, and technical limitations.
