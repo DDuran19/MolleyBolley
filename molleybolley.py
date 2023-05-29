@@ -435,7 +435,6 @@ class LoginWindow(tk.Tk):
         self.frame.destroy()
         self.create_main_frame()
         self.isAdmin=result[1]
-    
             
 
 class GraphResults(tk.Toplevel):
@@ -625,7 +624,6 @@ class GraphResults(tk.Toplevel):
             messagebox.showinfo("Failed",f"Something went wrong: {result[1]}")
         
 
-
 class ServicePopup(tk.Toplevel):
     _instance = None
     def __new__(cls,*args,**kwargs):
@@ -716,6 +714,38 @@ class ServicePopup(tk.Toplevel):
         self.destroy()
 
 class AdminPanel(tk.Toplevel):
+    """
+    This class creates a window that allows an administrator to manage users and their passwords.
+
+    The window has the following widgets:
+
+    * A dropdown menu that lists all of the users.
+    * A text field for the new user's name.
+    * A text field for the new user's username.
+    * A text field for the new user's password.
+    * A checkbox that allows the user to specify whether the new user should be an administrator.
+    * A button that creates the new user.
+    * A button that deletes the selected user.
+    * A button that changes the password of the selected user.
+    
+    Intended use:
+
+    The AdminPanel class can be used by administrators to manage users and their passwords. The window allows administrators to create new users, delete existing users, and change the passwords of existing users.
+
+    General description
+
+    The AdminPanel class inherits from the tk.Toplevel class. It has the following methods:
+
+    __init__(): This method initializes the window and creates the widgets.
+    create_widgets(): This method creates the widgets.
+    set_admin_privileges(): This method sets the admin privileges of the selected user.
+    passwords_match(): This method checks if the two passwords entered by the user match.
+    create_new_employee(): This method creates a new user.
+    delete_employee(): This method deletes the selected user.
+    change_password(): This method changes the password of the selected user.
+    exit_app(): This method closes the window.
+    """
+
     _instance = None
     button_style = {"foreground": WHITE, "background": ROYAL_BLUE, "width":20}
 
