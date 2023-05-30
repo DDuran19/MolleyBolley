@@ -291,7 +291,7 @@ class LoginWindow(tk.Tk):
 
     def insert_survey_and_facebook(self):
         self.socials_frame = tk.Frame(self.buttons_frame, bg="white")
-        self.socials_frame.grid(row=9, column=0, padx=5, sticky="n")
+        self.socials_frame.grid(row=10, column=0, padx=5, sticky="s")
 
         # Add survey logo
         self.survey_logo = Image.open("images/survey.png")
@@ -381,7 +381,7 @@ class LoginWindow(tk.Tk):
             if service in services_by_customer[0]:
                 service_dict[service]=1
 
-        ServicePopup(self,False,self.gather_services_completed_by_employee,
+        new = ServicePopup(self,False,self.gather_services_completed_by_employee,
                                employee,**service_dict)
         
     def gather_services_completed_by_employee(self):
