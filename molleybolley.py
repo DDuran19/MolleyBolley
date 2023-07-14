@@ -1,7 +1,7 @@
 import tkinter as tk
 import matplotlib.pyplot as plt
 import pandas as pd
-import datetime
+import datetime, os.path
 
 from queries import Data_analysis,Login_query,Update_services, Employees, ExportData,Create_Entry_For_Today
 
@@ -99,6 +99,7 @@ class LoginWindow(tk.Tk):
         super().__init__()
         self.title(self.app_title)
         self.configure(bg=WHITE)
+        self.customers = Customers()
         self.style = ttk.Style()
         self.style.theme_use('default')
         self.load_existing_data()
@@ -313,7 +314,7 @@ class LoginWindow(tk.Tk):
     def update_next_in_line(self):
         try:
             first_item = self.wait_list.item(self.wait_list.get_children()[0])
-            next_in_line_text = first_item['text'] 
+            next_in_line_text = first_item['text'].split(": ")[-1] 
             self.next_in_line.configure(text=next_in_line_text)
             self.modify_treeview_values(self.wait_list)
 
@@ -414,7 +415,10 @@ class LoginWindow(tk.Tk):
         new_popup = ServicePopup(self,True,self.get_service_data_to_be_updated, customer_name)
         
     def get_service_data_to_be_updated(self, query_data):
-        customer_name = self.customer_entry.get()
+        self.customers.update()
+        customer_name = f'\u2023{self.customers.get():03} {self.customer_entry.get()}'
+
+        # customer_name = f'{self.customers.get():03} \u2192 {self.customer_entry.get()}'
         self.service_data_to_be_updated:dict = query_data
         services=[]
         for key,value in self.service_data_to_be_updated.items():
@@ -453,6 +457,35 @@ class LoginWindow(tk.Tk):
         self.create_main_frame()
         self.isAdmin=result[1]
             
+class Customers:
+    def __init__(self):
+        self.create_file()
+
+    def create_file(self):
+        if not os.path.isfile("customers.txt"):
+            self.reset()
+        else:
+            self.get()
+
+    def get(self):
+        try:
+            with open("customers.txt", "r") as file:
+                self.file = int(file.read())
+                return self.file
+        except ValueError:
+            return 0
+
+    def update(self):
+        self.file = self.get() + 1
+        with open("customers.txt", "w") as file:
+            file.write(str(self.file))
+        return self.file
+
+    def reset(self):
+        self.file = 0
+        with open("customers.txt", "w") as file:
+            file.write(str(self.file))
+        return self.file
 
 class GraphResults(tk.Toplevel):
     """
@@ -863,6 +896,9 @@ class AdminPanel(tk.Toplevel):
 
             create_employee_button = tk.Button(self.adminmode, text="Create New Employee", **self.button_style,command=self.create_new_employee)
             create_employee_button.grid(row=6, column=0, columnspan=2)
+            
+            reset_customers = tk.Button(self.adminmode, text="Reset Customer Counter", **self.button_style,command=self.reset_customers)
+            reset_customers.grid(row=9, column=1, sticky="w")
 
         if self.isAdmin==2:
             self.current_role_checkbox_var = tk.BooleanVar()
@@ -873,7 +909,8 @@ class AdminPanel(tk.Toplevel):
             self.username_delete_dropdown = ttk.Combobox(self.adminmode, state=READONLY, values = self.usernames, textvariable=self.username_delete_dropdown_var, font=font_style, width=20)
             self.username_delete_dropdown.grid(row=7, column=1, pady=10)
             delete_employee = tk.Button(self.adminmode, text="Delete Employee", **self.button_style,command=self.delete_employee)
-            delete_employee.grid(row=8, column=1, sticky="w")
+            delete_employee.grid(row=8, column=1, sticky="w", pady=(20,0))
+
 
         change_password_label = tk.Label(main,text="Change password below", **self.Entry_style)
         change_password_label.grid(row = 1, column = 0, pady=(0,5),sticky=NORTHEASTWEST)
@@ -890,6 +927,13 @@ class AdminPanel(tk.Toplevel):
 
         exit_btn = tk.Button(main, text="Exit app", **self.button_style, font=font_style, command=self.exit_app)
         exit_btn.grid(row = 6, column = 0, pady = 5)
+    def reset_customers(self):
+        toggle_topmost(self)
+        customers = Customers()
+        result = messagebox.askquestion("Confirmation", "Are you sure you want to proceed?")
+        if result == "yes":
+            customers.reset()
+        toggle_topmost(self)
 
     def set_admin_privileges(self):
         self.newrole = int(self.role_checkbox_var.get())
