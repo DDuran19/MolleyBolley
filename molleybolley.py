@@ -232,7 +232,7 @@ class LoginWindow(tk.Tk):
         self.wait_list = ttk.Treeview(self.wait_list_frame, height=int(self.screen_height*0.0095), style="Custom.Treeview")
         self.wait_list.grid(row=0, column=0, pady=0,sticky=NORTHEASTWEST)
         self.wait_list['columns'] = ("Service",)
-        self.wait_list.heading("#0", text="Customer Name")
+        self.wait_list.heading("#0", text="Waiting list")
         self.wait_list.heading("Service", text="Services")
         self.wait_list.column("#0", width=int(self.screen_width*.75/2))
         self.wait_list.column("Service", width=int(self.screen_width*.75/2))
@@ -314,7 +314,7 @@ class LoginWindow(tk.Tk):
     def update_next_in_line(self):
         try:
             first_item = self.wait_list.item(self.wait_list.get_children()[0])
-            next_in_line_text = first_item['text'].split(": ")[-1] 
+            next_in_line_text = first_item['text'].split(". ")[-1] 
             self.next_in_line.configure(text=next_in_line_text)
             self.modify_treeview_values(self.wait_list)
 
@@ -325,10 +325,10 @@ class LoginWindow(tk.Tk):
         for index, item_id in enumerate(treeview.get_children(), start=1):
             current_values = treeview.item(item_id)['values']
             current_text = treeview.item(item_id)['text']
-            if ": " in current_text:
-                current_text=current_text.split(": ")[-1]
+            if ". " in current_text:
+                current_text=current_text.split(". ")[-1]
 
-            modified_text = f'{counter:02}: {current_text}'
+            modified_text = f'{counter:02}. {current_text}'
             treeview.delete(item_id)
             treeview.insert('', index-1, text=modified_text, values=current_values)
             counter += 1
@@ -344,7 +344,7 @@ class LoginWindow(tk.Tk):
         if not selected_customer:
             return None
         service, =self.wait_list.item(selected_customer)['values']
-        values = f"{service}: {self.wait_list.item(selected_customer)['text'].split(': ')[-1]}"
+        values = f'{service}: {self.wait_list.item(selected_customer)["text"].split(". ")[-1]}'
         self.wait_list.delete(selected_customer)
         self.update_next_in_line()
         return values
@@ -416,7 +416,7 @@ class LoginWindow(tk.Tk):
         
     def get_service_data_to_be_updated(self, query_data):
         self.customers.update()
-        customer_name = f'\u2023{self.customers.get():03} {self.customer_entry.get()}'
+        customer_name = f'     \u2023{self.customers.get():03} {self.customer_entry.get()}'
 
         # customer_name = f'{self.customers.get():03} \u2192 {self.customer_entry.get()}'
         self.service_data_to_be_updated:dict = query_data
