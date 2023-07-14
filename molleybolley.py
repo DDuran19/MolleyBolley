@@ -315,8 +315,23 @@ class LoginWindow(tk.Tk):
             first_item = self.wait_list.item(self.wait_list.get_children()[0])
             next_in_line_text = first_item['text'] 
             self.next_in_line.configure(text=next_in_line_text)
+            self.modify_treeview_values(self.wait_list)
+
         except IndexError:
             self.next_in_line.configure(text=EMPTY)
+    def modify_treeview_values(self,treeview: ttk.Treeview):
+        counter = 1
+        for index, item_id in enumerate(treeview.get_children(), start=1):
+            current_values = treeview.item(item_id)['values']
+            current_text = treeview.item(item_id)['text']
+            if ": " in current_text:
+                current_text=current_text.split(": ")[-1]
+
+            modified_text = f'{counter:02}: {current_text}'
+            treeview.delete(item_id)
+            treeview.insert('', index-1, text=modified_text, values=current_values)
+            counter += 1
+
 
     def delete_customer(self,event):
         selected_customer = self.wait_list.focus()
@@ -328,7 +343,7 @@ class LoginWindow(tk.Tk):
         if not selected_customer:
             return None
         service, =self.wait_list.item(selected_customer)['values']
-        values = f"{service}: {self.wait_list.item(selected_customer)['text']}"
+        values = f"{service}: {self.wait_list.item(selected_customer)['text'].split(': ')[-1]}"
         self.wait_list.delete(selected_customer)
         self.update_next_in_line()
         return values
@@ -384,11 +399,13 @@ class LoginWindow(tk.Tk):
         new = ServicePopup(self,False,self.gather_services_completed_by_employee,
                                employee,**service_dict)
         
+        
     def gather_services_completed_by_employee(self):
         employee = self.employee_list.focus()
         self.update_employee_list(employee,EMPTY,FREE)
         query = Employees()
         query.update_employee_status(employee,FREE)
+        self.update_employee_dropdown()
 
     def add_customer(self,event):
         customer_name = self.customer_entry.get()
@@ -493,7 +510,7 @@ class GraphResults(tk.Toplevel):
 
     def create_bar_graph(self,data: pd.DataFrame):
         transposed_data = data.transpose()
-
+    
         self.figure = plt.Figure(figsize=(6, 4))
         self.axes = self.figure.add_subplot(111)
 
