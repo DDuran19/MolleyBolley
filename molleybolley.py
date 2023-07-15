@@ -610,7 +610,7 @@ class GraphResults(tk.Toplevel):
                  background=[("active", "green"),  
                              ("hover", ROYAL_BLUE)])
 
-        extract_running = ttk.Button(extract_frame, text="Extract Running Today",style="Extract.TButton")
+        extract_running = ttk.Button(extract_frame, text="Extract Running Today",style="Extract.TButton", command=self.extract_running)
         extract_7days = ttk.Button(extract_frame, text="Extract Last 7 Days",style="Extract.TButton",
                                    command=self.extract_last_seven_days)
         extract_30days = ttk.Button(extract_frame, text="Extract Last 30 Days",style="Extract.TButton",
