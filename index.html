@@ -131,8 +131,16 @@
                 text-decoration: none;
             }
             .navbar > ul > li > a:hover {
-                background-color: transparent;
-                /* text-shadow: horizontal-shadow vertical-shadow blur color; */
+                text-shadow: rgba(19, 93, 253, 0.25) 0px 54px 55px,
+                    rgba(19, 93, 253, 0.12) 0px -12px 30px,
+                    rgba(19, 93, 253, 0.12) 0px 4px 6px,
+                    rgba(19, 93, 253, 0.17) 0px 12px 13px,
+                    rgba(19, 93, 253, 0.09) 0px -3px 5px;
+                color: rgb(106, 52, 255);
+                font-weight: bold;
+            }
+
+            .currentPage {
                 text-shadow: rgba(19, 93, 253, 0.25) 0px 54px 55px,
                     rgba(19, 93, 253, 0.12) 0px -12px 30px,
                     rgba(19, 93, 253, 0.12) 0px 4px 6px,
@@ -154,10 +162,10 @@
                 /></a>
                 <ul>
                     <li><a href="#installation">Installation</a></li>
-                    <li><a href="#getting-started">Getting Started</a></li>
-                    <li><a href="#data-analysis">Data Analysis</a></li>
+                    <li><a href="#gettingStarted">Getting Started</a></li>
+                    <li><a href="#dataAnalysis">Data Analysis</a></li>
                     <li>
-                        <a href="#employee-management">Employee Management</a>
+                        <a href="#employeeManagement">Employee Management</a>
                     </li>
                 </ul>
             </nav>
@@ -246,7 +254,7 @@
                     </li>
                 </ol>
             </section>
-            <section id="getting-started">
+            <section id="gettingStarted">
                 <h2>Getting Started</h2>
                 <p>To get started with MolleyBolley, follow these steps:</p>
                 <ol>
@@ -362,7 +370,7 @@
                     </li>
                 </ol>
             </section>
-            <section id="data-analysis">
+            <section id="dataAnalysis">
                 <h2>Data Analysis</h2>
                 <p>
                     To analyze sales data and extract information, follow these
@@ -400,7 +408,7 @@
                     </li>
                 </ol>
             </section>
-            <section id="employee-management">
+            <section id="employeeManagement">
                 <h2>Employee Management</h2>
                 <p>
                     To manage employees and perform administrative tasks, follow
@@ -452,5 +460,25 @@
                 </ol>
             </section>
         </main>
+        <script>
+            const navLinks = document.querySelectorAll(".navbar a");
+
+            function reset() {
+                navLinks.forEach((link) => {
+                    link.classList.contains("currentPage")
+                        ? link.classList.remove("currentPage")
+                        : null;
+                });
+            }
+
+            function highlightCurrentPage(e) {
+                reset();
+                e.target.classList.add("currentPage");
+            }
+
+            navLinks.forEach((link) => {
+                link.onclick = highlightCurrentPage;
+            });
+        </script>
     </body>
 </html>
