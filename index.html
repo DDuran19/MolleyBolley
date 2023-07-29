@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter&family=Nunito&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="icon" type="image/x-icon" href="/images/logo.ico" />
+        <title>Molley Bolley Instructions</title>
+        <style>
+            html {
+                scroll-behavior: smooth;
+            }
+            * {
+                padding: 0;
+                margin: 0;
+                box-sizing: 0;
+                font-family: "Inter", sans-serif;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                /* padding: 20px 0; */
+                /* background-color: rgb(103, 153, 218); */
+                background: linear-gradient(
+                    90deg,
+                    rgba(103, 153, 218, 1) 0%,
+                    rgba(156, 191, 238, 1) 42%,
+                    rgba(152, 188, 236, 1) 56%,
+                    rgba(103, 153, 218, 1) 100%
+                );
+            }
+            .main ol {
+                padding-left: 0.5em;
+            }
+
+            ol li {
+                list-style-type: decimal; /* or 'decimal-leading-zero', 'upper-alpha', 'lower-alpha'... */
+                list-style-position: outside; /* or 'inside' */
+                margin-left: 1em; /* gives 'room' for the numbers to appear in */
+            }
+            section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 650px;
+                max-width: 600px;
+                margin: 10px 0;
+                padding: 10px 0;
+                border: 1px solid black;
+                border-radius: 20px;
+                background-color: #fff;
+                box-shadow: 10px 5px 20px #000000;
+            }
+            img {
+                max-width: 500px;
+            }
+            h1,
+            h2 {
+                text-align: center;
+                font-family: "Nunito", sans-serif;
+                width: 95%;
+                position: sticky;
+                top: 60px;
+                background-color: #fff;
+                /* border-top-left-radius: 20px;
+                border-top-right-radius: 20px; */
+            }
+            p {
+                margin: 0.5rem 0;
+            }
+            .introduction {
+                text-align: center;
+            }
+
+            li > p > img {
+                margin-bottom: 20px;
+            }
+            .navContainer {
+                position: sticky;
+                z-index: 1;
+                top: 0;
+                background: linear-gradient(
+                    90deg,
+                    rgba(103, 153, 218, 1) 0%,
+                    rgba(156, 191, 238, 1) 42%,
+                    rgba(152, 188, 236, 1) 56%,
+                    rgba(103, 153, 218, 1) 100%
+                );
+                width: 100%;
+                height: 60px;
+                display: flex;
+                justify-content: center;
+            }
+            .navbar {
+                width: min(100%, 800px);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                margin: 20px;
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+            #business_logo {
+                border: 1px solid black;
+                border-radius: 10px;
+                box-shadow: 10px 5px 15px #1b34fb;
+                max-height: 40px;
+                margin-right: 80px;
+            }
+            .navbar > ul {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                list-style-type: none;
+                gap: 5px;
+            }
+            .navbar > ul > li > a {
+                color: #000;
+                text-decoration: none;
+            }
+            .navbar > ul > li > a:hover {
+                background-color: transparent;
+                /* text-shadow: horizontal-shadow vertical-shadow blur color; */
+                text-shadow: rgba(19, 93, 253, 0.25) 0px 54px 55px,
+                    rgba(19, 93, 253, 0.12) 0px -12px 30px,
+                    rgba(19, 93, 253, 0.12) 0px 4px 6px,
+                    rgba(19, 93, 253, 0.17) 0px 12px 13px,
+                    rgba(19, 93, 253, 0.09) 0px -3px 5px;
+                color: rgb(106, 52, 255);
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="navContainer">
+            <nav class="navbar">
+                <a href="#"
+                    ><img
+                        id="business_logo"
+                        src="images/business_logo.jpg"
+                        alt="MolleyBolley Logo"
+                /></a>
+                <ul>
+                    <li><a href="#installation">Installation</a></li>
+                    <li><a href="#getting-started">Getting Started</a></li>
+                    <li><a href="#data-analysis">Data Analysis</a></li>
+                    <li>
+                        <a href="#employee-management">Employee Management</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <main>
+            <section id="introduction">
+                <h1 id="molleybolley">MolleyBolley</h1>
+                <p>
+                    Welcome to MolleyBolley! This README will guide you through
+                    the installation process and provide a step-by-step guide on
+                    how to get started with the app.
+                </p>
+            </section>
+            <section id="installation">
+                <h2>Installation</h2>
+                <p>To install MolleyBolley, follow these steps:</p>
+                <ol>
+                    <li>
+                        <p>Read and agree to the terms and conditions.</p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Installation/1.png"
+                                alt="Step 1: Read and Agree to Terms"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Choose the directory where you want to save the
+                            installation files.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Installation/2.png"
+                                alt="Step 2: Choose Save Directory"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Create a start menu shortcut for easy access to
+                            MolleyBolley.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Installation/3.png"
+                                alt="Step 3: Create Start Menu Shortcut"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Optionally, create a desktop shortcut for even
+                            quicker access to the app.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Installation/4.png"
+                                alt="Step 4: Create Desktop Shortcut"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Click the &quot;Install&quot; button to begin the
+                            installation process.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Installation/5.png"
+                                alt="Step 5: Click Install"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Wait for the installation to complete, and then
+                            launch MolleyBolley.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Installation/6.png"
+                                alt="Step 6: Wait and Launch MolleyBolley"
+                            />
+                        </p>
+                    </li>
+                </ol>
+            </section>
+            <section id="getting-started">
+                <h2>Getting Started</h2>
+                <p>To get started with MolleyBolley, follow these steps:</p>
+                <ol>
+                    <li>
+                        <p>
+                            Log in with the credentials provided by the
+                            management.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Getting_Started/1.png"
+                                alt="Step 1: Log in"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Upon successful login, you will see the main screen.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Getting_Started/2.png"
+                                alt="Step 2: Main Screen"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Familiarize yourself with the screen setup, which
+                            includes the Customer Queue table, Employee List
+                            table, Customer information section, Customer
+                            assignment, employee assignment, and the
+                            advertisement section.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Getting_Started/3.gif"
+                                alt="Step 3: Screen Setup"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            To add a customer, enter the customer&#39;s name in
+                            the provided space and select the services they want
+                            to avail. Click &quot;Submit&quot; to automatically
+                            add them to the queue.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Getting_Started/4.gif"
+                                alt="Step 4: Add Customer"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            You can add multiple customers, and the first
+                            customer in the queue will always be next in line.
+                            Select an available employee from the employee
+                            dropdown and click &quot;Assign To&quot;.
+                        </p>
+                        <p>
+                            The customer will be removed from the queue and
+                            added to the &quot;Service&quot; column of the
+                            employee list. This indicates that the employee is
+                            currently serving this customer with the selected
+                            services. The employee&#39;s status will also
+                            change.
+                        </p>
+                        <p>
+                            The next customer in line will automatically become
+                            the first customer in the customer table.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Getting_Started/5.gif"
+                                alt="Step 5: Assign Customer"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Once the services are complete, select the employee
+                            from the list and choose &quot;Mark as Free&quot;. A
+                            popup window will appear, asking for all the
+                            services provided to the customer. You can modify
+                            the values based on the final result, considering
+                            any additional services requested or cancelled
+                            during the session.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Getting_Started/6.gif"
+                                alt="Step 6: Mark as Free"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            You can change your password in the settings panel
+                            by clicking the business logo on top. Just type in
+                            your new password twice and click the Change
+                            password button and you should be good to go. The
+                            exit button is also found on this window.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Getting_Started/7.gif"
+                                alt="Step 7: Settings Panel"
+                            />
+                        </p>
+                    </li>
+                </ol>
+            </section>
+            <section id="data-analysis">
+                <h2>Data Analysis</h2>
+                <p>
+                    To analyze sales data and extract information, follow these
+                    steps:
+                </p>
+                <ol>
+                    <li>
+                        <p>
+                            For a quick analysis of today&#39;s running sales,
+                            you can double-click anywhere on the employee list
+                            table. This action will open a pop-up table
+                            displaying the total services rendered today, as
+                            well as the number of customers served per employee.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Data_Analysis/1.gif"
+                                alt="Step 1: Simple Analysis"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            To extract data using an Excel file, click on the
+                            appropriate descriptive button below the Analysis
+                            Panel. This will open a save file dialog where you
+                            can choose the location to save the file.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Data_Analysis/2.gif"
+                                alt="Step 2: Data Extraction"
+                            />
+                        </p>
+                    </li>
+                </ol>
+            </section>
+            <section id="employee-management">
+                <h2>Employee Management</h2>
+                <p>
+                    To manage employees and perform administrative tasks, follow
+                    these steps:
+                </p>
+                <ol>
+                    <li>
+                        <p>
+                            If you have administrative powers, you can change
+                            the password of non-admin employees. Simply click on
+                            the dropdown menu, select the employee, type in the
+                            new password twice, and click on &quot;Change
+                            Password&quot;.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Admin_Panel/1.gif"
+                                alt="Step 1: Admin - Changing Passwords"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            As an admin, you have the power to create a new
+                            employee. Fill in the necessary fields with the
+                            employee&#39;s information.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Admin_Panel/2.gif"
+                                alt="Step 2: Admin - Adding New Employee"
+                            />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            There is only one Owner account, so make sure not to
+                            lose it. As the owner, you have the capability to
+                            delete employees from the database, change admin
+                            roles of your employees, and modify their passwords.
+                        </p>
+                        <p>
+                            <img
+                                src="images/how_to_use/Admin_Panel/3.gif"
+                                alt="Step 3: Owner - Deleting Employee"
+                            />
+                        </p>
+                    </li>
+                </ol>
+            </section>
+        </main>
+    </body>
+</html>
